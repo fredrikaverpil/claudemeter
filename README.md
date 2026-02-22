@@ -13,9 +13,15 @@ A minimal, opinionated and non-configurable, Claude Code status line.
 - [Go](https://go.dev/dl/) 1.26+
 - macOS (uses Keychain for credential resolution)
 
-### Via Claude Code plugin marketplace
+### Via Claude Code plugin
 
-1. Install the plugin from the Claude Code marketplace
+1. Inside Claude Code, add the plugin marketplace and install:
+
+```
+/plugin marketplace add fredrikaverpil/claudemeter
+/plugin install claudemeter@claudemeter
+```
+
 2. Run `/setup` inside Claude Code
 3. Restart Claude Code
 
