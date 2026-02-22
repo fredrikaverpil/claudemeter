@@ -77,6 +77,10 @@ type cacheEntry struct {
 const debugLogFile = "/tmp/claudeline-debug.log"
 
 func main() {
+	os.Exit(runMain())
+}
+
+func runMain() int {
 	debug := flag.Bool("debug", false, "write warnings and errors to "+debugLogFile)
 	flag.Parse()
 
@@ -94,8 +98,9 @@ func main() {
 
 	if err := run(); err != nil {
 		fmt.Fprintf(os.Stderr, "claudeline: %v\n", err)
-		os.Exit(1)
+		return 1
 	}
+	return 0
 }
 
 func run() error {
