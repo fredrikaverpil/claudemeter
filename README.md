@@ -45,8 +45,7 @@ go install github.com/fredrikaverpil/claudeline@latest
 
 3. Restart Claude Code
 
-> [!NOTE]
-> If you have a custom `$GOPATH`, replace `~/go/bin` with `$GOPATH/bin`.
+> [!NOTE] If you have a custom `$GOPATH`, replace `~/go/bin` with `$GOPATH/bin`.
 
 ## About
 
@@ -67,23 +66,27 @@ Single-file (`main.go`), single-package (`main`) design.
 Key components:
 
 - **Credential resolution:** macOS Keychain (`security find-generic-password`)
-  first, falls back to `~/.claude/.credentials.json`. Works on any platform
-  via the file fallback. Failure is non-fatal (usage bars are omitted).
+  first, falls back to `~/.claude/.credentials.json`. Works on any platform via
+  the file fallback. Failure is non-fatal (usage bars are omitted).
 - **Usage API:** `GET https://api.anthropic.com/api/oauth/usage` with OAuth
   bearer token. 5-second HTTP timeout.
-- **File-based cache:** `/tmp/claudeline-usage.json` with 60s TTL on
-  success, 15s TTL on failure.
+- **File-based cache:** `/tmp/claudeline-usage.json` with 60s TTL on success,
+  15s TTL on failure.
 - **Progress bars:** 5-char width using `█`/`░` with color thresholds
   (green/yellow/red for context; blue/magenta/red for quota).
-- **Compaction warning:** A yellow `⚠` appears on the context bar when usage
-  is within 5% of the auto-compaction threshold (85% by default, configurable
-  via `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE`).
-- **Error log:** `/tmp/claudeline.log` — errors from credential resolution,
-  API calls, etc. are appended here for debugging (`tail -f /tmp/claudeline.log`).
+- **Compaction warning:** A yellow `⚠` appears on the context bar when usage is
+  within 5% of the auto-compaction threshold (85% by default, configurable via
+  `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE`).
+- **Custom .claude folder**: Support `CLAUDE_CONFIG_DIR`.
+- **Debug mode:** Pass `-debug` to write warnings and errors to
+  `/tmp/claudeline-debug.log`. Set the statusline command to
+  `claudeline -debug`, then `tail -f /tmp/claudeline-debug.log` in another
+  terminal.
 
 ## References
 
-- [claude-hud](https://github.com/jarrodwatts/claude-hud) — inspiration for this project
+- [claude-hud](https://github.com/jarrodwatts/claude-hud) — inspiration for this
+  project
 - [Create Claude plugins](https://code.claude.com/docs/en/plugins)
 - [Customize your status line](https://code.claude.com/docs/en/statusline)
 - [Costs and context window](https://code.claude.com/docs/en/costs)

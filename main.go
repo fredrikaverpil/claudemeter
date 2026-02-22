@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"os/exec"
@@ -28,7 +29,6 @@ const (
 
 const (
 	cacheFile    = "/tmp/claudeline-usage.json"
-	logFile      = "/tmp/claudeline.log"
 	cacheTTLOK   = 60 * time.Second
 	cacheTTLFail = 15 * time.Second
 	usageURL     = "https://api.anthropic.com/api/oauth/usage"
@@ -73,7 +73,24 @@ type cacheEntry struct {
 	OK        bool            `json:"ok"`
 }
 
+const debugLogFile = "/tmp/claudeline-debug.log"
+
 func main() {
+	debug := flag.Bool("debug", false, "write warnings and errors to "+debugLogFile)
+	flag.Parse()
+
+	log.SetPrefix("claudeline: ")
+	log.SetFlags(log.Ldate | log.Ltime)
+	if *debug {
+		f, err := os.OpenFile(debugLogFile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o600)
+		if err == nil {
+			log.SetOutput(f)
+			defer func() { _ = f.Close() }()
+		}
+	} else {
+		log.SetOutput(io.Discard)
+	}
+
 	if err := run(); err != nil {
 		fmt.Fprintf(os.Stderr, "claudeline: %v\n", err)
 		os.Exit(1)
@@ -95,7 +112,7 @@ func run() error {
 	// Read credentials.
 	creds, err := readCredentials()
 	if err != nil {
-		logErr("credentials: %v", err)
+		log.Printf("credentials: %v", err)
 		creds = credentials{}
 	}
 
@@ -125,14 +142,14 @@ func run() error {
 	var usage5h, usage7d string
 	token := creds.ClaudeAiOauth.AccessToken
 	if token == "" {
-		logErr("usage: no access token found")
+		log.Printf("usage: no access token found")
 	} else if plan == "" {
-		logErr("usage: unknown subscription type %q, expected pro/max/team", creds.ClaudeAiOauth.SubscriptionType)
+		log.Printf("usage: unknown subscription type %q, expected pro/max/team", creds.ClaudeAiOauth.SubscriptionType)
 	}
 	if token != "" && plan != "" {
 		usage, fetchErr := fetchUsage(token)
 		if fetchErr != nil {
-			logErr("usage: %v", fetchErr)
+			log.Printf("usage: %v", fetchErr)
 		}
 		if fetchErr == nil && usage != nil {
 			pct5 := int(usage.FiveHour.Utilization)
@@ -369,15 +386,4 @@ func fetchUsageAPI(token string) (*usageResponse, error) {
 		return nil, fmt.Errorf("decode response: %w", err)
 	}
 	return &usage, nil
-}
-
-// logErr appends an error message to the log file.
-func logErr(format string, args ...any) {
-	f, err := os.OpenFile(logFile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o600)
-	if err != nil {
-		return
-	}
-	defer func() { _ = f.Close() }()
-	msg := fmt.Sprintf(format, args...)
-	_, _ = fmt.Fprintf(f, "%s %s\n", time.Now().Format("2006-01-02 15:04:05"), msg)
 }
