@@ -2,7 +2,9 @@ package main
 
 import (
 	"crypto/sha256"
+	"context"
 	"encoding/json"
+	"errors"
 	"flag"
 	"fmt"
 	"io"
@@ -11,6 +13,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	runtimedebug "runtime/debug"
 	"strconv"
 	"strings"
 	"time"
@@ -76,8 +79,22 @@ type cacheEntry struct {
 const debugLogFile = "/tmp/claudeline-debug.log"
 
 func main() {
+	os.Exit(runMain())
+}
+
+func runMain() int {
+	version := flag.Bool("version", false, "print version and exit")
 	debug := flag.Bool("debug", false, "write warnings and errors to "+debugLogFile)
 	flag.Parse()
+
+	if *version {
+		if info, ok := runtimedebug.ReadBuildInfo(); ok {
+			if _, err := fmt.Fprintln(os.Stdout, info.Main.Version); err != nil {
+				return 1
+			}
+		}
+		return 0
+	}
 
 	log.SetPrefix("claudeline: ")
 	log.SetFlags(log.Ldate | log.Ltime)
@@ -93,8 +110,9 @@ func main() {
 
 	if err := run(); err != nil {
 		fmt.Fprintf(os.Stderr, "claudeline: %v\n", err)
-		os.Exit(1)
+		return 1
 	}
+	return 0
 }
 
 func run() error {
@@ -176,8 +194,8 @@ func run() error {
 		output += sep + usage7d
 	}
 
-	fmt.Println(output)
-	return nil
+	_, err = fmt.Fprintln(os.Stdout, output)
+	return err
 }
 
 // buildIdentity returns the "[Model | Plan]" segment.
@@ -359,10 +377,10 @@ func readCache() (*usageResponse, error) {
 		return &usage, nil
 	}
 	if !entry.OK && age < cacheTTLFail {
-		return nil, fmt.Errorf("cached failure")
+		return nil, errors.New("cached failure")
 	}
 
-	return nil, fmt.Errorf("cache expired")
+	return nil, errors.New("cache expired")
 }
 
 // writeCache writes usage data to the cache file.
@@ -388,12 +406,12 @@ func writeCache(usage *usageResponse, ok bool) {
 // fetchUsageAPI makes the HTTP request to the usage API.
 func fetchUsageAPI(token string) (*usageResponse, error) {
 	client := &http.Client{Timeout: httpTimeout}
-	req, err := http.NewRequest(http.MethodGet, usageURL, nil)
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, usageURL, nil)
 	if err != nil {
 		return nil, fmt.Errorf("create request: %w", err)
 	}
 	req.Header.Set("Authorization", "Bearer "+token)
-	req.Header.Set("anthropic-beta", "oauth-2025-04-20")
+	req.Header.Set("Anthropic-Beta", "oauth-2025-04-20")
 
 	resp, err := client.Do(req)
 	if err != nil {
