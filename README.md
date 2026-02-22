@@ -6,20 +6,53 @@ A minimal, opinionated and non-configurable, Claude Code status line.
 [Opus 4.6 | Team] │ █░░░░░░░░░ 18% │ ████░░░░░░ 40% (2h 40m) │ ██░░░░░░░░ 27% (95h 40m)
 ```
 
-## Project
+## Installation
+
+### Prerequisites
+
+- [Go](https://go.dev/dl/) 1.24+
+- macOS (uses Keychain for credential resolution)
+
+### Via Claude Code plugin marketplace
+
+1. Install the plugin from the Claude Code marketplace
+2. Run `/setup` inside Claude Code
+3. Restart Claude Code
+
+### Manual
+
+1. Install the binary:
+
+```bash
+go install github.com/fredrikaverpil/claudemeter@latest
+```
+
+2. Add the statusline to `~/.claude/settings.json`:
+
+```json
+{
+  "statusLine": {
+    "type": "command",
+    "command": "claudemeter"
+  }
+}
+```
+
+3. Restart Claude Code
+
+> [!NOTE]
+> `$GOPATH/bin` must be in your `$PATH` for the `claudemeter` command to be
+> found. If you're unsure, run `go env GOPATH` and add `$(go env GOPATH)/bin` to
+> your shell profile.
+
+## About
 
 A Claude Code statusline plugin written in Go. It displays the current AI model,
 subscription plan, context window usage, and 5-hour/7-day quota usage as
 ANSI-colored progress bars. Zero external dependencies (stdlib only).
 
-## Build and Run
-
-```bash
-go build -o claudemeter .
-```
-
-No Makefile, no test suite, no linter config. The binary reads JSON from stdin
-(provided by Claude Code) and writes a single ANSI-colored line to stdout.
+The binary reads JSON from stdin (provided by Claude Code) and writes a single
+ANSI-colored line to stdout.
 
 ## Architecture
 
@@ -39,12 +72,6 @@ Key components:
   success, 15s TTL on failure.
 - **Progress bars:** 10-char width using `█`/`░` with color thresholds
   (green/yellow/red for context; blue/magenta/red for quota).
-
-## Plugin Metadata
-
-`/.claude-plugin/plugin.json` — plugin identity and version for the Claude Code
-marketplace. `/commands/setup.md` — slash command that configures
-`~/.claude/settings.json` to use this binary.
 
 ## References
 
