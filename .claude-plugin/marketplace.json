@@ -1,5 +1,5 @@
 {
-  "name": "claudemeter",
+  "name": "claudeline",
   "owner": {
     "name": "Fredrik Averpil",
     "email": ""
@@ -10,7 +10,7 @@
   },
   "plugins": [
     {
-      "name": "claudemeter",
+      "name": "claudeline",
       "source": "./",
       "description": "A minimal, opinionated and non-configurable, Claude Code status line",
       "category": "monitoring",

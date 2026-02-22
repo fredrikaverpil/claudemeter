@@ -1,6 +1,6 @@
-# Setup claudemeter
+# Setup claudeline
 
-Configure the claudemeter plugin as your Claude Code statusline.
+Configure the claudeline plugin as your Claude Code statusline.
 
 ## Prerequisites
 
@@ -12,13 +12,13 @@ Configure the claudemeter plugin as your Claude Code statusline.
 1. Install the binary:
 
 ```bash
-go install github.com/fredrikaverpil/claudemeter@latest
+go install github.com/fredrikaverpil/claudeline@latest
 ```
 
 2. Verify the binary is available:
 
 ```bash
-which claudemeter
+which claudeline
 ```
 
 If this fails, tell the user to add `$GOPATH/bin` to their `$PATH` and retry.
@@ -29,7 +29,7 @@ If this fails, tell the user to add `$GOPATH/bin` to their `$PATH` and retry.
 {
   "statusLine": {
     "type": "command",
-    "command": "claudemeter"
+    "command": "claudeline"
   }
 }
 ```

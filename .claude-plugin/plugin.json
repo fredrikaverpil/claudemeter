@@ -1,12 +1,12 @@
 {
-  "name": "claudemeter",
+  "name": "claudeline",
   "description": "A minimal, opinionated and non-configurable, Claude Code status line",
   "version": "0.1.0",
   "author": {
     "name": "Fredrik Averpil",
     "url": "https://github.com/fredrikaverpil"
   },
-  "homepage": "https://github.com/fredrikaverpil/claudemeter",
-  "repository": "https://github.com/fredrikaverpil/claudemeter",
+  "homepage": "https://github.com/fredrikaverpil/claudeline",
+  "repository": "https://github.com/fredrikaverpil/claudeline",
   "license": "MIT"
 }

@@ -1,4 +1,4 @@
-# claudemeter
+# claudeline
 
 A minimal, opinionated and non-configurable, Claude Code status line.
 
@@ -17,11 +17,11 @@ A minimal, opinionated and non-configurable, Claude Code status line.
 1. Inside Claude Code, add the plugin marketplace and install:
 
 ```
-/plugin marketplace add fredrikaverpil/claudemeter
-/plugin install claudemeter@claudemeter
+/plugin marketplace add fredrikaverpil/claudeline
+/plugin install claudeline@claudeline
 ```
 
-2. Run `/claudemeter:setup` inside Claude Code
+2. Run `/claudeline:setup` inside Claude Code
 3. Restart Claude Code
 
 ### Manual
@@ -29,7 +29,7 @@ A minimal, opinionated and non-configurable, Claude Code status line.
 1. Install the binary:
 
 ```bash
-go install github.com/fredrikaverpil/claudemeter@latest
+go install github.com/fredrikaverpil/claudeline@latest
 ```
 
 2. Add the statusline to `~/.claude/settings.json`:
@@ -38,7 +38,7 @@ go install github.com/fredrikaverpil/claudemeter@latest
 {
   "statusLine": {
     "type": "command",
-    "command": "~/go/bin/claudemeter"
+    "command": "~/go/bin/claudeline"
   }
 }
 ```
@@ -71,7 +71,7 @@ Key components:
   via the file fallback. Failure is non-fatal (usage bars are omitted).
 - **Usage API:** `GET https://api.anthropic.com/api/oauth/usage` with OAuth
   bearer token. 5-second HTTP timeout.
-- **File-based cache:** `/tmp/claudemeter-usage.json` with 60s TTL on
+- **File-based cache:** `/tmp/claudeline-usage.json` with 60s TTL on
   success, 15s TTL on failure.
 - **Progress bars:** 5-char width using `█`/`░` with color thresholds
   (green/yellow/red for context; blue/magenta/red for quota).
