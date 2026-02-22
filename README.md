@@ -38,7 +38,7 @@ go install github.com/fredrikaverpil/claudemeter@latest
 {
   "statusLine": {
     "type": "command",
-    "command": "claudemeter"
+    "command": "~/go/bin/claudemeter"
   }
 }
 ```
@@ -46,9 +46,7 @@ go install github.com/fredrikaverpil/claudemeter@latest
 3. Restart Claude Code
 
 > [!NOTE]
-> `$GOPATH/bin` must be in your `$PATH` for the `claudemeter` command to be
-> found. If you're unsure, run `go env GOPATH` and add `$(go env GOPATH)/bin` to
-> your shell profile.
+> If you have a custom `$GOPATH`, replace `~/go/bin` with `$GOPATH/bin`.
 
 ## About
 
