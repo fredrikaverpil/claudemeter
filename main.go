@@ -221,7 +221,6 @@ func formatLocalTime(iso, layout string) string {
 	return target.Local().Format(layout)
 }
 
-
 // readCredentials reads OAuth credentials from keychain or file.
 func readCredentials() (credentials, error) {
 	// Try macOS keychain first.
