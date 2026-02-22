@@ -30,7 +30,7 @@ const (
 	cacheTTLFail = 15 * time.Second
 	usageURL     = "https://api.anthropic.com/api/oauth/usage"
 	httpTimeout  = 5 * time.Second
-	barWidth     = 10
+	barWidth     = 5
 )
 
 // stdinData is the JSON structure received from Claude Code via stdin.

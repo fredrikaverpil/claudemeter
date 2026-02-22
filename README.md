@@ -3,7 +3,7 @@
 A minimal, opinionated and non-configurable, Claude Code status line.
 
 ```sh
-[Opus 4.6 | Team] │ █░░░░░░░░░ 18% │ ████░░░░░░ 40% (12:59) │ ██░░░░░░░░ 27% (Thu 10:00)
+[Opus 4.6 | Team] │ █░░░░ 18% │ ██░░░ 40% (12:59) │ █░░░░ 27% (Thu 10:00)
 ```
 
 ## Installation
@@ -75,7 +75,7 @@ Key components:
   bearer token. 5-second HTTP timeout.
 - **File-based cache:** `/tmp/claudemeter-usage.json` with 60s TTL on
   success, 15s TTL on failure.
-- **Progress bars:** 10-char width using `█`/`░` with color thresholds
+- **Progress bars:** 5-char width using `█`/`░` with color thresholds
   (green/yellow/red for context; blue/magenta/red for quota).
 
 ## References
