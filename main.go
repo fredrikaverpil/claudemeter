@@ -118,13 +118,13 @@ func run() error {
 		if fetchErr == nil && usage != nil {
 			pct5 := int(usage.FiveHour.Utilization)
 			usage5h = bar(pct5, quotaColor)
-			if reset := timeUntil(usage.FiveHour.ResetsAt); reset != "" {
+			if reset := formatLocalTime(usage.FiveHour.ResetsAt); reset != "" {
 				usage5h += " (" + reset + ")"
 			}
 
 			pct7 := int(usage.SevenDay.Utilization)
 			usage7d = bar(pct7, quotaColor)
-			if reset := timeUntil(usage.SevenDay.ResetsAt); reset != "" {
+			if reset := formatLocalDateTime(usage.SevenDay.ResetsAt); reset != "" {
 				usage7d += " (" + reset + ")"
 			}
 		}
@@ -215,9 +215,8 @@ func bar(pct int, colorFn func(int) string) string {
 	)
 }
 
-// timeUntil parses an ISO 8601 timestamp and returns a human-readable duration.
-// When more than 24h remain, returns "Xd Yh". Otherwise returns "Xh YYm".
-func timeUntil(iso string) string {
+// formatLocalTime parses an ISO 8601 timestamp and returns the local time in 24h format ("15:04").
+func formatLocalTime(iso string) string {
 	if iso == "" {
 		return ""
 	}
@@ -225,19 +224,21 @@ func timeUntil(iso string) string {
 	if err != nil {
 		return ""
 	}
-	d := time.Until(target)
-	if d < 0 {
-		d = 0
-	}
-	totalHours := int(d.Hours())
-	if totalHours >= 24 {
-		days := totalHours / 24
-		hours := totalHours % 24
-		return fmt.Sprintf("%dd %dh", days, hours)
-	}
-	mins := int(d.Minutes()) % 60
-	return fmt.Sprintf("%dh %02dm", totalHours, mins)
+	return target.Local().Format("15:04")
 }
+
+// formatLocalDateTime parses an ISO 8601 timestamp and returns the local day and time ("Mon 15:04").
+func formatLocalDateTime(iso string) string {
+	if iso == "" {
+		return ""
+	}
+	target, err := time.Parse(time.RFC3339, iso)
+	if err != nil {
+		return ""
+	}
+	return target.Local().Format("Mon 15:04")
+}
+
 
 // readCredentials reads OAuth credentials from keychain or file.
 func readCredentials() (credentials, error) {
