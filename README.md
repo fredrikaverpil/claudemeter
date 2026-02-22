@@ -11,7 +11,6 @@ A minimal, opinionated and non-configurable, Claude Code status line.
 ### Prerequisites
 
 - [Go](https://go.dev/dl/) 1.26+
-- macOS (uses Keychain for credential resolution)
 
 ### Via Claude Code plugin
 
@@ -70,8 +69,8 @@ Single-file (`main.go`), single-package (`main`) design.
 Key components:
 
 - **Credential resolution:** macOS Keychain (`security find-generic-password`)
-  first, falls back to `~/.claude/.credentials.json`. Failure is non-fatal
-  (usage bars are omitted).
+  first, falls back to `~/.claude/.credentials.json`. Works on any platform
+  via the file fallback. Failure is non-fatal (usage bars are omitted).
 - **Usage API:** `GET https://api.anthropic.com/api/oauth/usage` with OAuth
   bearer token. 5-second HTTP timeout.
 - **File-based cache:** `/tmp/claudemeter-usage.json` with 60s TTL on
@@ -81,5 +80,6 @@ Key components:
 
 ## References
 
+- [claude-hud](https://github.com/jarrodwatts/claude-hud) — inspiration for this project
 - [Create Claude plugins](https://code.claude.com/docs/en/plugins)
 - [Customize your status line](https://code.claude.com/docs/en/statusline)
