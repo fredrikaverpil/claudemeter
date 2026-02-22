@@ -1,6 +1,8 @@
 package main
 
 import (
+	"os"
+	"path/filepath"
 	"testing"
 )
 
@@ -13,17 +15,27 @@ func TestCacheFilePath(t *testing.T) {
 		{
 			name:            "no CLAUDE_CONFIG_DIR set",
 			claudeConfigDir: "",
-			want:            "/tmp/claudeline-usage.json",
+			want:            filepath.Join(os.TempDir(), "claudeline-usage.json"),
 		},
 		{
 			name:            "custom config dir claude-personal",
 			claudeConfigDir: "/Users/oa/.claude-personal",
-			want:            "/tmp/claudeline-usage-81c94270.json",
+			want:            filepath.Join(os.TempDir(), "claudeline-usage-81c94270.json"),
 		},
 		{
 			name:            "custom config dir claude-work",
 			claudeConfigDir: "/Users/oa/.claude-work",
-			want:            "/tmp/claudeline-usage-1ef5702c.json",
+			want:            filepath.Join(os.TempDir(), "claudeline-usage-1ef5702c.json"),
+		},
+		{
+			name:            "windows config dir claude-personal",
+			claudeConfigDir: `C:\Users\oa\.claude-personal`,
+			want:            filepath.Join(os.TempDir(), "claudeline-usage-9b705f7c.json"),
+		},
+		{
+			name:            "windows config dir claude-work",
+			claudeConfigDir: `C:\Users\oa\.claude-work`,
+			want:            filepath.Join(os.TempDir(), "claudeline-usage-34fd078b.json"),
 		},
 	}
 
@@ -58,6 +70,16 @@ func TestKeychainServiceName(t *testing.T) {
 			name:            "custom config dir claude-work",
 			claudeConfigDir: "/Users/oa/.claude-work",
 			want:            "Claude Code-credentials-1ef5702c",
+		},
+		{
+			name:            "windows config dir claude-personal",
+			claudeConfigDir: `C:\Users\oa\.claude-personal`,
+			want:            "Claude Code-credentials-9b705f7c",
+		},
+		{
+			name:            "windows config dir claude-work",
+			claudeConfigDir: `C:\Users\oa\.claude-work`,
+			want:            "Claude Code-credentials-34fd078b",
 		},
 	}
 
