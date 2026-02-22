@@ -18,6 +18,7 @@ const (
 	green         = "\033[32m"
 	yellow        = "\033[33m"
 	red           = "\033[31m"
+	cyan          = "\033[36m"
 	brightBlue    = "\033[94m"
 	brightMagenta = "\033[95m"
 	dim           = "\033[2m"
@@ -147,9 +148,9 @@ func run() error {
 func buildIdentity(model, plan string) string {
 	switch {
 	case model != "" && plan != "":
-		return "[" + model + " | " + plan + "]"
+		return cyan + "[" + model + " | " + plan + "]" + ansiReset
 	case model != "":
-		return "[" + model + "]"
+		return cyan + "[" + model + "]" + ansiReset
 	default:
 		return ""
 	}
