@@ -10,7 +10,7 @@ A minimal, opinionated and non-configurable, Claude Code status line.
 
 ### Prerequisites
 
-- [Go](https://go.dev/dl/) 1.24+
+- [Go](https://go.dev/dl/) 1.26+
 - macOS (uses Keychain for credential resolution)
 
 ### Via Claude Code plugin marketplace
