@@ -176,8 +176,8 @@ func run() error {
 		output += sep + usage7d
 	}
 
-	fmt.Println(output)
-	return nil
+	_, err = fmt.Fprintln(os.Stdout, output)
+	return err
 }
 
 // buildIdentity returns the "[Model | Plan]" segment.
