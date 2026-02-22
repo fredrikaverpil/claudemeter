@@ -78,6 +78,8 @@ Key components:
 - **Compaction warning:** A yellow `⚠` appears on the context bar when usage
   is within 5% of the auto-compaction threshold (85% by default, configurable
   via `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE`).
+- **Error log:** `/tmp/claudeline.log` — errors from credential resolution,
+  API calls, etc. are appended here for debugging (`tail -f /tmp/claudeline.log`).
 
 ## References
 

@@ -27,6 +27,7 @@ const (
 
 const (
 	cacheFile    = "/tmp/claudeline-usage.json"
+	logFile      = "/tmp/claudeline.log"
 	cacheTTLOK   = 60 * time.Second
 	cacheTTLFail = 15 * time.Second
 	usageURL     = "https://api.anthropic.com/api/oauth/usage"
@@ -93,7 +94,7 @@ func run() error {
 	// Read credentials.
 	creds, err := readCredentials()
 	if err != nil {
-		// Non-fatal: we just won't show usage.
+		logErr("credentials: %v", err)
 		creds = credentials{}
 	}
 
@@ -108,22 +109,30 @@ func run() error {
 	if data.ContextWindow.UsedPercentage != nil {
 		contextPct = int(*data.ContextWindow.UsedPercentage)
 	}
-	contextBar := bar(contextPct, contextColor)
-
 	// Warn when context is near auto-compaction threshold.
 	compactPct := 85
 	if v, err := strconv.Atoi(os.Getenv("CLAUDE_AUTOCOMPACT_PCT_OVERRIDE")); err == nil && v > 0 && v <= 100 {
 		compactPct = v
 	}
-	if contextPct >= compactPct-5 {
+	warnPct := compactPct - 5
+	contextBar := bar(contextPct, contextColorFunc(warnPct))
+	if contextPct >= warnPct {
 		contextBar += " " + yellow + "⚠" + ansiReset
 	}
 
 	// Usage bars.
 	var usage5h, usage7d string
 	token := creds.ClaudeAiOauth.AccessToken
+	if token == "" {
+		logErr("usage: no access token found")
+	} else if plan == "" {
+		logErr("usage: unknown subscription type %q, expected pro/max/team", creds.ClaudeAiOauth.SubscriptionType)
+	}
 	if token != "" && plan != "" {
 		usage, fetchErr := fetchUsage(token)
+		if fetchErr != nil {
+			logErr("usage: %v", fetchErr)
+		}
 		if fetchErr == nil && usage != nil {
 			pct5 := int(usage.FiveHour.Utilization)
 			usage5h = bar(pct5, quotaColor)
@@ -180,15 +189,18 @@ func planName(subType string) string {
 	}
 }
 
-// contextColor returns the ANSI color for a context usage percentage.
-func contextColor(pct int) string {
-	switch {
-	case pct >= 85:
-		return red
-	case pct >= 70:
-		return yellow
-	default:
-		return green
+// contextColorFunc returns a color function for context usage that turns red
+// at the given warning percentage (compaction threshold minus margin).
+func contextColorFunc(warnPct int) func(int) string {
+	return func(pct int) string {
+		switch {
+		case pct >= warnPct:
+			return red
+		case pct >= 70:
+			return yellow
+		default:
+			return green
+		}
 	}
 }
 
@@ -341,7 +353,7 @@ func fetchUsageAPI(token string) (*usageResponse, error) {
 	if err != nil {
 		return nil, fmt.Errorf("execute request: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("unexpected status %d", resp.StatusCode)
@@ -352,4 +364,15 @@ func fetchUsageAPI(token string) (*usageResponse, error) {
 		return nil, fmt.Errorf("decode response: %w", err)
 	}
 	return &usage, nil
+}
+
+// logErr appends an error message to the log file.
+func logErr(format string, args ...any) {
+	f, err := os.OpenFile(logFile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o600)
+	if err != nil {
+		return
+	}
+	defer func() { _ = f.Close() }()
+	msg := fmt.Sprintf(format, args...)
+	_, _ = fmt.Fprintf(f, "%s %s\n", time.Now().Format("2006-01-02 15:04:05"), msg)
 }
