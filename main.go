@@ -214,7 +214,8 @@ func bar(pct int, colorFn func(int) string) string {
 	)
 }
 
-// timeUntil parses an ISO 8601 timestamp and returns "Xh XXm" until that time.
+// timeUntil parses an ISO 8601 timestamp and returns a human-readable duration.
+// When more than 24h remain, returns "Xd Yh". Otherwise returns "Xh YYm".
 func timeUntil(iso string) string {
 	if iso == "" {
 		return ""
@@ -227,9 +228,14 @@ func timeUntil(iso string) string {
 	if d < 0 {
 		d = 0
 	}
-	hours := int(d.Hours())
+	totalHours := int(d.Hours())
+	if totalHours >= 24 {
+		days := totalHours / 24
+		hours := totalHours % 24
+		return fmt.Sprintf("%dd %dh", days, hours)
+	}
 	mins := int(d.Minutes()) % 60
-	return fmt.Sprintf("%dh %02dm", hours, mins)
+	return fmt.Sprintf("%dh %02dm", totalHours, mins)
 }
 
 // readCredentials reads OAuth credentials from keychain or file.
