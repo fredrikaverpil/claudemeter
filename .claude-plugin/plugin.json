@@ -1,12 +1,12 @@
 {
-  "name": "claude-status-line",
-  "description": "Minimal statusline showing model, plan, context, and usage bars",
+  "name": "claudemeter",
+  "description": "A minimal, opinionated and non-configurable, Claude Code status line",
   "version": "0.1.0",
   "author": {
     "name": "Fredrik Averpil",
     "url": "https://github.com/fredrikaverpil"
   },
-  "homepage": "https://github.com/fredrikaverpil/claude-status-line",
-  "repository": "https://github.com/fredrikaverpil/claude-status-line",
+  "homepage": "https://github.com/fredrikaverpil/claudemeter",
+  "repository": "https://github.com/fredrikaverpil/claudemeter",
   "license": "MIT"
 }

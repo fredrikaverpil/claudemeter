@@ -1,13 +1,13 @@
-# Setup claude-status-line
+# Setup claudemeter
 
-Configure the claude-status-line plugin as your Claude Code statusline.
+Configure the claudemeter plugin as your Claude Code statusline.
 
 ## Steps
 
 1. Build the Go binary (if not already built):
 
 ```bash
-cd ~/code/public/claude-status-line && go build -o claude-status-line .
+cd ~/code/public/claudemeter && go build -o claudemeter .
 ```
 
 2. Read the current `~/.claude/settings.json` and update the `statusLine` field to:
@@ -16,7 +16,7 @@ cd ~/code/public/claude-status-line && go build -o claude-status-line .
 {
   "statusLine": {
     "type": "command",
-    "command": "/Users/fredrik/code/public/claude-status-line/claude-status-line"
+    "command": "/Users/fredrik/code/public/claudemeter/claudemeter"
   }
 }
 ```

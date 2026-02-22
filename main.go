@@ -25,7 +25,7 @@ const (
 )
 
 const (
-	cacheFile    = "/tmp/claude-statusline-usage.json"
+	cacheFile    = "/tmp/claudemeter-usage.json"
 	cacheTTLOK   = 60 * time.Second
 	cacheTTLFail = 15 * time.Second
 	usageURL     = "https://api.anthropic.com/api/oauth/usage"
@@ -72,7 +72,7 @@ type cacheEntry struct {
 
 func main() {
 	if err := run(); err != nil {
-		fmt.Fprintf(os.Stderr, "claude-status-line: %v\n", err)
+		fmt.Fprintf(os.Stderr, "claudemeter: %v\n", err)
 		os.Exit(1)
 	}
 }
