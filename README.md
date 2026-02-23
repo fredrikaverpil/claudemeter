@@ -6,6 +6,13 @@ A minimal, opinionated and non-configurable, Claude Code status line.
 [Opus 4.6 | Team] │ ████░ 80% ⚠ │ ███░░ 74% (13:00) │ █░░░░ 30% (Thu 10:00)
 ```
 
+
+
+## Screenshot
+
+<img width="707" height="161" alt="claudeline" src="https://github.com/user-attachments/assets/b14abd16-6661-4dab-9db7-ddc91d8fdadb" /><br>
+_[ model | subscription type ] | context usage % | 5hr usage % (reset time) | 7d usage % (reset time)_
+
 ## Installation
 
 ### Prerequisites
