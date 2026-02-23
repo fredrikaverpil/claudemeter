@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.4](https://github.com/fredrikaverpil/claudeline/compare/v0.2.3...v0.2.4) (2026-02-23)
+
+
+### Bug Fixes
+
+* prevent ANSI color artifacts in status line ([#19](https://github.com/fredrikaverpil/claudeline/issues/19)) ([96ac652](https://github.com/fredrikaverpil/claudeline/commit/96ac65230ae217b1896b473fc1ba1fc44f377769))
+
 ## [0.2.3](https://github.com/fredrikaverpil/claudeline/compare/v0.2.2...v0.2.3) (2026-02-22)
 
 
