@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0](https://github.com/fredrikaverpil/claudeline/compare/v0.2.4...v0.3.0) (2026-02-24)
+
+
+### Features
+
+* add goreleaser to release workflow ([#22](https://github.com/fredrikaverpil/claudeline/issues/22)) ([13928f8](https://github.com/fredrikaverpil/claudeline/commit/13928f8eea054d6be072c9e1b59c52828109fe1e))
+
 ## [0.2.4](https://github.com/fredrikaverpil/claudeline/compare/v0.2.3...v0.2.4) (2026-02-23)
 
 
