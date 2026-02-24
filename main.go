@@ -112,15 +112,13 @@ func buildVersion() string {
 
 // config holds CLI configuration.
 type config struct {
-	showGitTag   bool
-	gitTagMaxLen int
+	showGitBranch bool
 }
 
 func runMain() int {
 	showVersion := flag.Bool("version", false, "print version and exit")
 	debug := flag.Bool("debug", false, "write warnings and errors to "+debugLogFile)
-	showGitTag := flag.Bool("git-tag", false, "show git tag in the status line")
-	gitTagMaxLen := flag.Int("git-tag-max-len", 30, "max display length for git tag")
+	showGitBranch := flag.Bool("git-branch", false, "show git branch in the status line")
 	flag.Parse()
 
 	if *showVersion {
@@ -143,8 +141,7 @@ func runMain() int {
 	}
 
 	cfg := config{
-		showGitTag:   *showGitTag,
-		gitTagMaxLen: *gitTagMaxLen,
+		showGitBranch: *showGitBranch,
 	}
 	if err := run(cfg); err != nil {
 		fmt.Fprintf(os.Stderr, "claudeline: %v\n", err)
@@ -225,12 +222,9 @@ func run(cfg config) error {
 	// Render output.
 	sep := dim + " │ " + ansiReset
 	output := identity
-	if branch := compactName(getBranch(), 30); branch != "" {
-		output += sep + dim + branch + ansiReset
-	}
-	if cfg.showGitTag {
-		if tag := compactName(getTag(), cfg.gitTagMaxLen); tag != "" {
-			output += sep + yellow + tag + ansiReset
+	if cfg.showGitBranch {
+		if branch := compactName(getBranch(), 30); branch != "" {
+			output += sep + dim + branch + ansiReset
 		}
 	}
 	output += sep + contextBar
@@ -402,17 +396,6 @@ func getBranch() string {
 		return after
 	}
 	return "" // detached HEAD or bare repo
-}
-
-// getTag returns the tag pointing at HEAD, or "" if HEAD is not tagged.
-func getTag() string {
-	out, err := exec.Command("git", "tag", "--points-at", "HEAD").Output()
-	if err != nil {
-		return ""
-	}
-	// git tag --points-at can return multiple tags; take the first.
-	tag, _, _ := strings.Cut(strings.TrimSpace(string(out)), "\n")
-	return tag
 }
 
 // compactName truncates a name to maxLen runes using a Unicode ellipsis.
