@@ -45,6 +45,26 @@ with no external dependencies (stdlib only).
 
 3. Restart Claude Code
 
+## Flags
+
+| Flag               | Default | Description                                          |
+| ------------------ | ------- | ---------------------------------------------------- |
+| `-debug`           | `false` | Write warnings/errors to `/tmp/claudeline-debug.log` |
+| `-git-tag`         | `false` | Show git tag in the status line                      |
+| `-git-tag-max-len` | `30`    | Max display length for git tag                       |
+| `-version`         | `false` | Print version and exit                               |
+
+Example with git tag enabled:
+
+```json
+{
+  "statusLine": {
+    "type": "command",
+    "command": "claudeline -git-tag"
+  }
+}
+```
+
 ## About
 
 ## Architecture
@@ -68,6 +88,8 @@ Key components:
 - **Compaction warning:** A yellow `⚠` appears on the context bar when usage is
   within 5% of the auto-compaction threshold (85% by default, configurable via
   `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE`).
+- **Git info:** Branch name always shown, read from `.git/HEAD` (no subprocess).
+  Tag resolved via `git tag --points-at HEAD`, opt-in with `-git-tag`.
 - **Custom .claude folder**: Support `CLAUDE_CONFIG_DIR`.
 - **Debug mode:** Pass `-debug` to write warnings and errors to
   `/tmp/claudeline-debug.log`. Set the statusline command to
