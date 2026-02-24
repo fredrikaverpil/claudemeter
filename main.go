@@ -21,6 +21,13 @@ import (
 	"time"
 )
 
+// version and commit are set via ldflags by goreleaser.
+// When empty, the version falls back to runtime/debug.ReadBuildInfo.
+var (
+	version string
+	commit  string
+)
+
 // ANSI color constants.
 const (
 	green         = "\033[32m"
@@ -84,16 +91,33 @@ func main() {
 	os.Exit(runMain())
 }
 
+// buildVersion returns the version string. It prefers the ldflags-injected
+// version (set by goreleaser), falling back to runtime/debug.ReadBuildInfo
+// (set by go install/run and local builds).
+func buildVersion() string {
+	v := version
+	if v == "" {
+		if info, ok := runtimedebug.ReadBuildInfo(); ok {
+			v = info.Main.Version
+		}
+	}
+	if v == "" {
+		v = "(unknown)"
+	}
+	if commit != "" {
+		v += " (" + commit + ")"
+	}
+	return v
+}
+
 func runMain() int {
-	version := flag.Bool("version", false, "print version and exit")
+	showVersion := flag.Bool("version", false, "print version and exit")
 	debug := flag.Bool("debug", false, "write warnings and errors to "+debugLogFile)
 	flag.Parse()
 
-	if *version {
-		if info, ok := runtimedebug.ReadBuildInfo(); ok {
-			if _, err := fmt.Fprintln(os.Stdout, info.Main.Version); err != nil {
-				return 1
-			}
+	if *showVersion {
+		if _, err := fmt.Fprintln(os.Stdout, buildVersion()); err != nil {
+			return 1
 		}
 		return 0
 	}
