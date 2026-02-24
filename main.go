@@ -110,9 +110,17 @@ func buildVersion() string {
 	return v
 }
 
+// config holds CLI configuration.
+type config struct {
+	showGitTag   bool
+	gitTagMaxLen int
+}
+
 func runMain() int {
 	showVersion := flag.Bool("version", false, "print version and exit")
 	debug := flag.Bool("debug", false, "write warnings and errors to "+debugLogFile)
+	showGitTag := flag.Bool("git-tag", false, "show git tag in the status line")
+	gitTagMaxLen := flag.Int("git-tag-max-len", 30, "max display length for git tag")
 	flag.Parse()
 
 	if *showVersion {
@@ -134,14 +142,18 @@ func runMain() int {
 		log.SetOutput(io.Discard)
 	}
 
-	if err := run(); err != nil {
+	cfg := config{
+		showGitTag:   *showGitTag,
+		gitTagMaxLen: *gitTagMaxLen,
+	}
+	if err := run(cfg); err != nil {
 		fmt.Fprintf(os.Stderr, "claudeline: %v\n", err)
 		return 1
 	}
 	return 0
 }
 
-func run() error {
+func run(cfg config) error {
 	// Read stdin JSON.
 	input, err := io.ReadAll(os.Stdin)
 	if err != nil {
@@ -212,7 +224,16 @@ func run() error {
 
 	// Render output.
 	sep := dim + " │ " + ansiReset
-	output := identity + sep + contextBar
+	output := identity
+	if branch := compactName(getBranch(), 30); branch != "" {
+		output += sep + dim + branch + ansiReset
+	}
+	if cfg.showGitTag {
+		if tag := compactName(getTag(), cfg.gitTagMaxLen); tag != "" {
+			output += sep + yellow + tag + ansiReset
+		}
+	}
+	output += sep + contextBar
 	if usage5h != "" {
 		output += sep + usage5h
 	}
@@ -368,6 +389,40 @@ func readCredentials() (credentials, error) {
 		return credentials{}, fmt.Errorf("parse credentials file: %w", err)
 	}
 	return creds, nil
+}
+
+// getBranch returns the current git branch name, or "" if not in a git repo.
+func getBranch() string {
+	data, err := os.ReadFile(".git/HEAD")
+	if err != nil {
+		return ""
+	}
+	s := strings.TrimSpace(string(data))
+	if after, ok := strings.CutPrefix(s, "ref: refs/heads/"); ok {
+		return after
+	}
+	return "" // detached HEAD or bare repo
+}
+
+// getTag returns the tag pointing at HEAD, or "" if HEAD is not tagged.
+func getTag() string {
+	out, err := exec.Command("git", "tag", "--points-at", "HEAD").Output()
+	if err != nil {
+		return ""
+	}
+	// git tag --points-at can return multiple tags; take the first.
+	tag, _, _ := strings.Cut(strings.TrimSpace(string(out)), "\n")
+	return tag
+}
+
+// compactName truncates a name to maxLen runes using a Unicode ellipsis.
+func compactName(name string, maxLen int) string {
+	runes := []rune(name)
+	if len(runes) <= maxLen {
+		return name
+	}
+	half := (maxLen - 1) / 2
+	return string(runes[:half]) + "…" + string(runes[len(runes)-(maxLen-1-half):])
 }
 
 // fetchUsage fetches usage data from the API with file-based caching.
