@@ -15,11 +15,7 @@ with no external dependencies (stdlib only).
 
 ## Installation
 
-### Prerequisites
-
-- [Go](https://go.dev/dl/) 1.26+
-
-### Via Claude Code plugin
+### Via Claude Code plugin (recommended)
 
 1. Inside Claude Code, add the plugin marketplace and install:
 
@@ -33,28 +29,21 @@ with no external dependencies (stdlib only).
 
 ### Manual
 
-1. Install the binary:
-
-```bash
-go install github.com/fredrikaverpil/claudeline@latest
-```
-
+1. Download the latest binary from
+   [GitHub releases](https://github.com/fredrikaverpil/claudeline/releases), or
+   use `go install github.com/fredrikaverpil/claudeline@latest`.
 2. Add the statusline to `~/.claude/settings.json`:
 
 ```json
 {
   "statusLine": {
     "type": "command",
-    "command": "~/go/bin/claudeline"
+    "command": "~/.local/bin/claudeline"
   }
 }
 ```
 
 3. Restart Claude Code
-
-> [!NOTE]
->
-> If you have a custom `$GOPATH`, replace `~/go/bin` with `$GOPATH/bin`.
 
 ## About
 
