@@ -85,8 +85,14 @@ Key components:
   bearer token. 5-second HTTP timeout.
 - **File-based cache:** `/tmp/claudeline-usage.json` with 60s TTL on success,
   15s TTL on failure.
-- **Progress bars:** 5-char width using `█`/`░` with color thresholds
-  (green/yellow/red for context; blue/magenta/red for quota).
+- **Context bar:** 5-char width using `█`/`░` with four color zones inspired by
+  [Dax Horthy's "dumb zone" theory](https://www.youtube.com/watch?v=rmvDxxNubIg&t=493s)
+  on context window quality degradation:
+  - **Smart** (green, 0–40%) — model performs at full capability
+  - **Dumb** (yellow, 41–60%) — quality starts to degrade
+  - **Danger** (orange, 61–80%) — significant quality loss
+  - **Near compaction** (red, 80%+) — approaching auto-compaction threshold
+- **Quota bars:** 5-char width using `█`/`░` (blue/magenta/red).
 - **Compaction warning:** A yellow `⚠` appears on the context bar when usage is
   within 5% of the auto-compaction threshold (85% by default, configurable via
   `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE`).
