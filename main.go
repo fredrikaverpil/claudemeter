@@ -49,7 +49,7 @@ const (
 	barWidth     = 5
 )
 
-var debugLogFile = filepath.Join(os.TempDir(), "claudeline-debug.log")
+var debugLogFile = filepath.Join(tempDir(), "claudeline-debug.log")
 
 // stdinData is the JSON structure received from Claude Code via stdin.
 type stdinData struct {
@@ -351,10 +351,18 @@ func keychainServiceName() string {
 	return fmt.Sprintf("%s-%x", base, h[:4])
 }
 
+// tempDir returns /tmp on Unix systems and the OS temp directory on Windows.
+func tempDir() string {
+	if runtime.GOOS == "windows" {
+		return os.TempDir()
+	}
+	return "/tmp"
+}
+
 // cacheFilePath returns the file path for the usage cache.
 // When CLAUDE_CONFIG_DIR is set, a hash suffix is appended to avoid collisions between profiles.
 func cacheFilePath() string {
-	base := filepath.Join(os.TempDir(), "claudeline-usage")
+	base := filepath.Join(tempDir(), "claudeline-usage")
 	configDir := os.Getenv("CLAUDE_CONFIG_DIR")
 	if configDir == "" {
 		return base + ".json"
