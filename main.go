@@ -232,6 +232,11 @@ func run(cfg config) error {
 	// Render output.
 	sep := dim + " │ " + ansiReset
 	output := identity
+	if cfg.showCwd {
+		if name := cwdName(data.Cwd, cfg.cwdMaxLen); name != "" {
+			output += sep + dim + name + ansiReset
+		}
+	}
 	if cfg.showGitBranch {
 		if branch := compactName(getBranch(), cfg.gitBranchMaxLen); branch != "" {
 			output += sep + dim + branch + ansiReset
