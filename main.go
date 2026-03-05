@@ -52,6 +52,7 @@ var debugLogFile = filepath.Join(os.TempDir(), "claudeline-debug.log")
 
 // stdinData is the JSON structure received from Claude Code via stdin.
 type stdinData struct {
+	Cwd   string `json:"cwd"`
 	Model struct {
 		DisplayName string `json:"display_name"`
 	} `json:"model"`
@@ -399,6 +400,16 @@ func getBranch() string {
 		return after
 	}
 	return "" // detached HEAD or bare repo
+}
+
+// cwdName extracts the last path segment from cwd as the folder name.
+func cwdName(cwd string, maxLen int) string {
+	// Normalize separators for cross-platform support.
+	name := filepath.Base(strings.ReplaceAll(cwd, `\`, "/"))
+	if name == "." || name == "/" {
+		return ""
+	}
+	return compactName(name, maxLen)
 }
 
 // compactName truncates a name to maxLen runes using a Unicode ellipsis.

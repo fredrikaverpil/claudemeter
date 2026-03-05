@@ -142,6 +142,67 @@ func TestCompactName(t *testing.T) {
 	}
 }
 
+func TestCwdName(t *testing.T) {
+	tests := []struct {
+		name   string
+		cwd    string
+		maxLen int
+		want   string
+	}{
+		{
+			name:   "simple path",
+			cwd:    "/Users/fredrik/code/public/claudeline",
+			maxLen: 30,
+			want:   "claudeline",
+		},
+		{
+			name:   "root path",
+			cwd:    "/",
+			maxLen: 30,
+			want:   "",
+		},
+		{
+			name:   "empty cwd",
+			cwd:    "",
+			maxLen: 30,
+			want:   "",
+		},
+		{
+			name:   "trailing slash",
+			cwd:    "/Users/fredrik/code/claudeline/",
+			maxLen: 30,
+			want:   "claudeline",
+		},
+		{
+			name:   "long name truncated",
+			cwd:    "/home/user/my-very-long-project-name-that-exceeds-limit",
+			maxLen: 20,
+			want:   "my-very-l…eeds-limit",
+		},
+		{
+			name:   "windows path",
+			cwd:    `C:\Users\oa\code\claudeline`,
+			maxLen: 30,
+			want:   "claudeline",
+		},
+		{
+			name:   "home directory",
+			cwd:    "/Users/fredrik",
+			maxLen: 30,
+			want:   "fredrik",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := cwdName(tt.cwd, tt.maxLen)
+			if got != tt.want {
+				t.Errorf("cwdName(%q, %d) = %q, want %q", tt.cwd, tt.maxLen, got, tt.want)
+			}
+		})
+	}
+}
+
 func TestGetBranch(t *testing.T) {
 	tmp := t.TempDir()
 
