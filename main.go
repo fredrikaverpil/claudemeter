@@ -33,6 +33,7 @@ const (
 	green         = "\033[32m"
 	yellow        = "\033[33m"
 	red           = "\033[31m"
+	magenta       = "\033[35m"
 	cyan          = "\033[36m"
 	brightBlue    = "\033[94m"
 	brightMagenta = "\033[95m"
@@ -52,6 +53,7 @@ var debugLogFile = filepath.Join(os.TempDir(), "claudeline-debug.log")
 
 // stdinData is the JSON structure received from Claude Code via stdin.
 type stdinData struct {
+	Cwd   string `json:"cwd"`
 	Model struct {
 		DisplayName string `json:"display_name"`
 	} `json:"model"`
@@ -114,6 +116,8 @@ func buildVersion() string {
 type config struct {
 	showGitBranch   bool
 	gitBranchMaxLen int
+	showCwd         bool
+	cwdMaxLen       int
 }
 
 func runMain() int {
@@ -121,6 +125,8 @@ func runMain() int {
 	debug := flag.Bool("debug", false, "write warnings and errors to "+debugLogFile)
 	showGitBranch := flag.Bool("git-branch", false, "show git branch in the status line")
 	gitBranchMaxLen := flag.Int("git-branch-max-len", 30, "max display length for git branch")
+	showCwd := flag.Bool("cwd", false, "show working directory name in the status line")
+	cwdMaxLen := flag.Int("cwd-max-len", 30, "max display length for working directory name")
 	flag.Parse()
 
 	if *showVersion {
@@ -145,6 +151,8 @@ func runMain() int {
 	cfg := config{
 		showGitBranch:   *showGitBranch,
 		gitBranchMaxLen: *gitBranchMaxLen,
+		showCwd:         *showCwd,
+		cwdMaxLen:       *cwdMaxLen,
 	}
 	if err := run(cfg); err != nil {
 		fmt.Fprintf(os.Stderr, "claudeline: %v\n", err)
@@ -225,9 +233,14 @@ func run(cfg config) error {
 	// Render output.
 	sep := dim + " │ " + ansiReset
 	output := identity
+	if cfg.showCwd {
+		if name := cwdName(data.Cwd, cfg.cwdMaxLen); name != "" {
+			output += sep + yellow + name + ansiReset
+		}
+	}
 	if cfg.showGitBranch {
 		if branch := compactName(getBranch(), cfg.gitBranchMaxLen); branch != "" {
-			output += sep + dim + branch + ansiReset
+			output += sep + magenta + branch + ansiReset
 		}
 	}
 	output += sep + contextBar
@@ -399,6 +412,20 @@ func getBranch() string {
 		return after
 	}
 	return "" // detached HEAD or bare repo
+}
+
+// cwdName extracts the last path segment from cwd as the folder name.
+func cwdName(cwd string, maxLen int) string {
+	// Normalize separators for cross-platform support.
+	name := filepath.Base(strings.ReplaceAll(cwd, `\`, "/"))
+	switch {
+	case name == "." || name == "/" || name == `\`:
+		return ""
+	case len(name) == 2 && name[1] == ':':
+		// Bare Windows drive letter (e.g. "C:") — root of a drive.
+		return ""
+	}
+	return compactName(name, maxLen)
 }
 
 // compactName truncates a name to maxLen runes using a Unicode ellipsis.
