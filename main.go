@@ -46,7 +46,7 @@ const (
 	cacheTTLOK   = 60 * time.Second
 	cacheTTLFail = 15 * time.Second
 	usageURL     = "https://api.anthropic.com/api/oauth/usage"
-	httpTimeout  = 5 * time.Second
+	ioTimeout    = 5 * time.Second
 	barWidth     = 5
 )
 
@@ -163,6 +163,8 @@ func runMain() int {
 }
 
 func run(cfg config) error {
+	ctx := context.Background()
+
 	// Read stdin JSON.
 	input, err := io.ReadAll(os.Stdin)
 	if err != nil {
@@ -175,7 +177,7 @@ func run(cfg config) error {
 	}
 
 	// Read credentials.
-	creds, err := readCredentials()
+	creds, err := readCredentials(ctx)
 	if err != nil {
 		log.Printf("credentials: %v", err)
 		creds = credentials{}
@@ -212,7 +214,7 @@ func run(cfg config) error {
 		log.Printf("usage: unknown subscription type %q, expected pro/max/team", creds.ClaudeAiOauth.SubscriptionType)
 	}
 	if token != "" && plan != "" {
-		usage, fetchErr := fetchUsage(token)
+		usage, fetchErr := fetchUsage(ctx, token)
 		if fetchErr != nil {
 			log.Printf("usage: %v", fetchErr)
 		}
@@ -378,11 +380,13 @@ func cacheFilePath() string {
 }
 
 // readCredentials reads OAuth credentials from keychain or file.
-func readCredentials() (credentials, error) {
+func readCredentials(ctx context.Context) (credentials, error) {
 	// Try macOS keychain first.
 	if runtime.GOOS == "darwin" {
 		serviceName := keychainServiceName()
-		out, err := exec.Command(
+		ctx, cancel := context.WithTimeout(ctx, ioTimeout)
+		defer cancel()
+		out, err := exec.CommandContext(ctx,
 			"/usr/bin/security", "find-generic-password",
 			"-s", serviceName, "-w",
 		).Output()
@@ -453,14 +457,14 @@ func compactName(name string, maxLen int) string {
 }
 
 // fetchUsage fetches usage data from the API with file-based caching.
-func fetchUsage(token string) (*usageResponse, error) {
+func fetchUsage(ctx context.Context, token string) (*usageResponse, error) {
 	// Check cache.
 	if cached, err := readCache(); err == nil {
 		return cached, nil
 	}
 
 	// Fetch from API.
-	usage, err := fetchUsageAPI(token)
+	usage, err := fetchUsageAPI(ctx, token)
 	if err != nil {
 		writeCache(nil, false)
 		return nil, fmt.Errorf("fetch usage API: %w", err)
@@ -518,16 +522,17 @@ func writeCache(usage *usageResponse, ok bool) {
 }
 
 // fetchUsageAPI makes the HTTP request to the usage API.
-func fetchUsageAPI(token string) (*usageResponse, error) {
-	client := &http.Client{Timeout: httpTimeout}
-	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, usageURL, nil)
+func fetchUsageAPI(ctx context.Context, token string) (*usageResponse, error) {
+	ctx, cancel := context.WithTimeout(ctx, ioTimeout)
+	defer cancel()
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, usageURL, nil)
 	if err != nil {
 		return nil, fmt.Errorf("create request: %w", err)
 	}
 	req.Header.Set("Authorization", "Bearer "+token)
 	req.Header.Set("Anthropic-Beta", "oauth-2025-04-20")
 
-	resp, err := client.Do(req)
+	resp, err := (&http.Client{}).Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("execute request: %w", err)
 	}
