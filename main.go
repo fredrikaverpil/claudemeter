@@ -356,6 +356,31 @@ func bar(pct int, colorFn func(int) string) string {
 	)
 }
 
+// formatExtraUsage returns the "$used/$limit" string for pay-as-you-go overage.
+// Returns "" when extra usage is nil, disabled, or missing dollar amounts.
+func formatExtraUsage(extra *extraUsage) string {
+	if extra == nil || !extra.IsEnabled || extra.MonthlyLimit == nil || extra.UsedCredits == nil {
+		return ""
+	}
+	used := *extra.UsedCredits / 100
+	limit := *extra.MonthlyLimit / 100
+	return fmt.Sprintf("$%d/$%d", used, limit)
+}
+
+// formatQuotaSubBar renders a per-model quota bar with a trailing label.
+// Returns "" when the quota is nil.
+func formatQuotaSubBar(q *quotaLimit, label string) string {
+	if q == nil {
+		return ""
+	}
+	pct := int(math.Round(q.Utilization))
+	s := bar(pct, quotaColor) + " " + label
+	if reset := formatLocalTime(q.ResetsAt, "15:04"); reset != "" {
+		s += " (" + reset + ")"
+	}
+	return s
+}
+
 // formatLocalTime parses an ISO 8601 timestamp and formats it in the local timezone.
 func formatLocalTime(iso, layout string) string {
 	if iso == "" {

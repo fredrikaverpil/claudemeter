@@ -543,6 +543,88 @@ func assertIntPtr(t *testing.T, name string, got, want *int) {
 	}
 }
 
+func TestFormatExtraUsage(t *testing.T) {
+	tests := []struct {
+		name  string
+		extra *extraUsage
+		want  string
+	}{
+		{
+			name:  "nil extra usage",
+			extra: nil,
+			want:  "",
+		},
+		{
+			name:  "disabled",
+			extra: &extraUsage{IsEnabled: false},
+			want:  "",
+		},
+		{
+			name:  "enabled with zero usage",
+			extra: &extraUsage{IsEnabled: true, MonthlyLimit: new(5000), UsedCredits: new(0)},
+			want:  "$0/$50",
+		},
+		{
+			name:  "enabled with usage",
+			extra: &extraUsage{IsEnabled: true, MonthlyLimit: new(5000), UsedCredits: new(1234)},
+			want:  "$12/$50",
+		},
+		{
+			name:  "enabled with nil fields",
+			extra: &extraUsage{IsEnabled: true, MonthlyLimit: nil, UsedCredits: nil},
+			want:  "",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := formatExtraUsage(tt.extra)
+			if got != tt.want {
+				t.Errorf("formatExtraUsage() = %q, want %q", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestFormatQuotaSubBar(t *testing.T) {
+	tests := []struct {
+		name  string
+		q     *quotaLimit
+		label string
+		want  string // just check it contains the label and percentage
+	}{
+		{
+			name:  "nil quota",
+			q:     nil,
+			label: "son",
+			want:  "",
+		},
+		{
+			name:  "sonnet at 12%",
+			q:     &quotaLimit{Utilization: 12, ResetsAt: "2026-03-09T13:00:00+00:00"},
+			label: "son",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := formatQuotaSubBar(tt.q, tt.label)
+			if tt.q == nil {
+				if got != "" {
+					t.Errorf("formatQuotaSubBar(nil) = %q, want empty", got)
+				}
+				return
+			}
+			if !strings.Contains(got, tt.label) {
+				t.Errorf("formatQuotaSubBar() = %q, missing label %q", got, tt.label)
+			}
+			if !strings.Contains(got, "12%") {
+				t.Errorf("formatQuotaSubBar() = %q, missing percentage", got)
+			}
+		})
+	}
+}
+
 func TestGetBranch(t *testing.T) {
 	tmp := t.TempDir()
 
