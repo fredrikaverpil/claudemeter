@@ -78,16 +78,28 @@ type credentials struct {
 	} `json:"claudeAiOauth"`
 }
 
+// quotaLimit is a single usage quota with utilization percentage and reset time.
+type quotaLimit struct {
+	Utilization float64 `json:"utilization"`
+	ResetsAt    string  `json:"resets_at"`
+}
+
+// extraUsage is the pay-as-you-go overage info.
+type extraUsage struct {
+	IsEnabled    bool `json:"is_enabled"`
+	MonthlyLimit *int `json:"monthly_limit"`
+	UsedCredits  *int `json:"used_credits"`
+}
+
 // usageResponse is the API response from the usage endpoint.
 type usageResponse struct {
-	FiveHour struct {
-		Utilization float64 `json:"utilization"`
-		ResetsAt    string  `json:"resets_at"`
-	} `json:"five_hour"`
-	SevenDay struct {
-		Utilization float64 `json:"utilization"`
-		ResetsAt    string  `json:"resets_at"`
-	} `json:"seven_day"`
+	FiveHour         quotaLimit  `json:"five_hour"`
+	SevenDay         quotaLimit  `json:"seven_day"`
+	SevenDaySonnet   *quotaLimit `json:"seven_day_sonnet"`
+	SevenDayOpus     *quotaLimit `json:"seven_day_opus"`
+	SevenDayOAuthApp *quotaLimit `json:"seven_day_oauth_apps"`
+	SevenDayCowork   *quotaLimit `json:"seven_day_cowork"`
+	ExtraUsage       *extraUsage `json:"extra_usage"`
 }
 
 // cacheEntry is the file-based cache structure.

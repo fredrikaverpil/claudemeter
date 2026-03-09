@@ -429,6 +429,120 @@ func TestParseRetryAfter(t *testing.T) {
 	}
 }
 
+func TestUsageResponseUnmarshal(t *testing.T) {
+	tests := []struct {
+		name  string
+		input string
+		want  usageResponse
+	}{
+		{
+			name: "full response with all fields",
+			input: `{
+				"five_hour": {"utilization": 8.0, "resets_at": "2026-03-09T11:00:00+00:00"},
+				"seven_day": {"utilization": 31.0, "resets_at": "2026-03-15T08:00:00+00:00"},
+				"seven_day_sonnet": {"utilization": 12, "resets_at": "2026-03-09T13:00:00+00:00"},
+				"seven_day_opus": {"utilization": 45, "resets_at": "2026-03-09T14:00:00+00:00"},
+				"seven_day_oauth_apps": null,
+				"seven_day_cowork": {"utilization": 5, "resets_at": "2026-03-10T08:00:00+00:00"},
+				"iguana_necktie": null,
+				"extra_usage": {"is_enabled": true, "monthly_limit": 5000, "used_credits": 1234, "utilization": null}
+			}`,
+			want: usageResponse{
+				FiveHour: quotaLimit{Utilization: 8.0, ResetsAt: "2026-03-09T11:00:00+00:00"},
+				SevenDay: quotaLimit{Utilization: 31.0, ResetsAt: "2026-03-15T08:00:00+00:00"},
+				SevenDaySonnet: &quotaLimit{Utilization: 12, ResetsAt: "2026-03-09T13:00:00+00:00"},
+				SevenDayOpus:   &quotaLimit{Utilization: 45, ResetsAt: "2026-03-09T14:00:00+00:00"},
+				SevenDayCowork: &quotaLimit{Utilization: 5, ResetsAt: "2026-03-10T08:00:00+00:00"},
+				ExtraUsage: &extraUsage{
+					IsEnabled:    true,
+					MonthlyLimit: new(5000),
+					UsedCredits:  new(1234),
+				},
+			},
+		},
+		{
+			name: "minimal response with nulls",
+			input: `{
+				"five_hour": {"utilization": 0, "resets_at": null},
+				"seven_day": {"utilization": 14, "resets_at": "2026-03-13T08:00:00+00:00"},
+				"seven_day_sonnet": null,
+				"seven_day_opus": null,
+				"seven_day_oauth_apps": null,
+				"seven_day_cowork": null,
+				"iguana_necktie": null,
+				"extra_usage": {"is_enabled": false, "monthly_limit": null, "used_credits": null, "utilization": null}
+			}`,
+			want: usageResponse{
+				FiveHour: quotaLimit{Utilization: 0},
+				SevenDay: quotaLimit{Utilization: 14, ResetsAt: "2026-03-13T08:00:00+00:00"},
+				ExtraUsage: &extraUsage{
+					IsEnabled: false,
+				},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var got usageResponse
+			if err := json.Unmarshal([]byte(tt.input), &got); err != nil {
+				t.Fatalf("Unmarshal() error = %v", err)
+			}
+			if got.FiveHour != tt.want.FiveHour {
+				t.Errorf("FiveHour = %+v, want %+v", got.FiveHour, tt.want.FiveHour)
+			}
+			if got.SevenDay != tt.want.SevenDay {
+				t.Errorf("SevenDay = %+v, want %+v", got.SevenDay, tt.want.SevenDay)
+			}
+			assertQuotaLimitPtr(t, "SevenDaySonnet", got.SevenDaySonnet, tt.want.SevenDaySonnet)
+			assertQuotaLimitPtr(t, "SevenDayOpus", got.SevenDayOpus, tt.want.SevenDayOpus)
+			assertQuotaLimitPtr(t, "SevenDayCowork", got.SevenDayCowork, tt.want.SevenDayCowork)
+			assertExtraUsage(t, got.ExtraUsage, tt.want.ExtraUsage)
+		})
+	}
+}
+
+func assertQuotaLimitPtr(t *testing.T, name string, got, want *quotaLimit) {
+	t.Helper()
+	if got == nil && want == nil {
+		return
+	}
+	if (got == nil) != (want == nil) {
+		t.Errorf("%s: got %v, want %v", name, got, want)
+		return
+	}
+	if *got != *want {
+		t.Errorf("%s = %+v, want %+v", name, *got, *want)
+	}
+}
+
+func assertExtraUsage(t *testing.T, got, want *extraUsage) {
+	t.Helper()
+	if got == nil && want == nil {
+		return
+	}
+	if (got == nil) != (want == nil) {
+		t.Errorf("ExtraUsage: got %v, want %v", got, want)
+		return
+	}
+	if got.IsEnabled != want.IsEnabled {
+		t.Errorf("ExtraUsage.IsEnabled = %v, want %v", got.IsEnabled, want.IsEnabled)
+	}
+	assertIntPtr(t, "ExtraUsage.MonthlyLimit", got.MonthlyLimit, want.MonthlyLimit)
+	assertIntPtr(t, "ExtraUsage.UsedCredits", got.UsedCredits, want.UsedCredits)
+}
+
+func assertIntPtr(t *testing.T, name string, got, want *int) {
+	t.Helper()
+	if (got == nil) != (want == nil) {
+		t.Errorf("%s: got %v, want %v", name, got, want)
+		return
+	}
+	if got != nil && *got != *want {
+		t.Errorf("%s = %d, want %d", name, *got, *want)
+	}
+}
+
 func TestGetBranch(t *testing.T) {
 	tmp := t.TempDir()
 
