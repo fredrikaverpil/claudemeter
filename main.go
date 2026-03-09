@@ -554,8 +554,13 @@ func writeCache(usage *usageResponse, ok bool, retryAfter time.Duration) {
 
 // fetchUsageAPI makes the HTTP request to the usage API.
 // On rate limit (429), retryAfter contains the duration from the retry-after header.
-// When the API returns Retry-After: 0, a single immediate retry is attempted
-// to distinguish "retry now" from a bad signal.
+//
+// NOTE: The undocumented OAuth usage API (/api/oauth/usage) has been observed
+// to return "Retry-After: 0" on 429 responses. Per the HTTP spec, 0 means
+// "retry now", but blindly doing so would hammer the API. To distinguish a
+// genuine "retry now" from a bad/unset header, we perform a single immediate
+// retry. If the retry also returns 429, we treat "0" as a bad signal and
+// fall back to the conservative default TTL (cacheTTLRateLimitDefault).
 func fetchUsageAPI(ctx context.Context, token string) (_ *usageResponse, retryAfter time.Duration, _ error) {
 	usage, rawRetryAfter, err := doUsageRequest(ctx, token)
 	if err == nil {
