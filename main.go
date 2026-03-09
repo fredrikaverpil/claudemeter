@@ -45,7 +45,7 @@ const (
 const (
 	cacheTTLOK        = 60 * time.Second
 	cacheTTLFail      = 15 * time.Second
-	cacheTTLRateLimit = 1 * time.Minute
+	cacheTTLRateLimit = 5 * time.Minute
 	usageURL          = "https://api.anthropic.com/api/oauth/usage"
 	ioTimeout         = 5 * time.Second
 	barWidth          = 5
