@@ -723,6 +723,35 @@ func TestRenderOutput(t *testing.T) {
 	}
 }
 
+func TestFormatResetTime(t *testing.T) {
+	// Use a fixed "now" for deterministic tests.
+	now := time.Date(2026, 3, 9, 10, 0, 0, 0, time.UTC)
+
+	// Test today: should NOT contain day name.
+	todayResult := formatResetTime("2026-03-09T13:00:00+00:00", now)
+	if todayResult == "" {
+		t.Fatal("formatResetTime returned empty for valid today timestamp")
+	}
+	if strings.Contains(todayResult, "Mon") || strings.Contains(todayResult, "Sun") || strings.Contains(todayResult, "Tue") {
+		t.Errorf("today reset should not contain day name, got %q", todayResult)
+	}
+
+	// Test different day: should contain day name.
+	futureResult := formatResetTime("2026-03-15T08:00:00+00:00", now)
+	if futureResult == "" {
+		t.Fatal("formatResetTime returned empty for valid future timestamp")
+	}
+	if !strings.Contains(futureResult, "Sun") {
+		t.Errorf("future reset should contain day name 'Sun', got %q", futureResult)
+	}
+
+	// Test empty.
+	emptyResult := formatResetTime("", now)
+	if emptyResult != "" {
+		t.Errorf("formatResetTime('') = %q, want empty", emptyResult)
+	}
+}
+
 func TestGetBranch(t *testing.T) {
 	tmp := t.TempDir()
 

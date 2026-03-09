@@ -444,10 +444,29 @@ func formatQuotaSubBar(q *quotaLimit, label string) string {
 	}
 	pct := int(math.Round(q.Utilization))
 	s := bar(pct, quotaColor) + " " + label
-	if reset := formatLocalTime(q.ResetsAt, "15:04"); reset != "" {
+	if reset := formatResetTime(q.ResetsAt, time.Now()); reset != "" {
 		s += " (" + reset + ")"
 	}
 	return s
+}
+
+// formatResetTime formats a reset timestamp, showing just the time if it's
+// today, or the day and time if it's a different day.
+func formatResetTime(iso string, now time.Time) string {
+	if iso == "" {
+		return ""
+	}
+	target, err := time.Parse(time.RFC3339, iso)
+	if err != nil {
+		return ""
+	}
+	local := target.Local()
+	y1, m1, d1 := now.Date()
+	y2, m2, d2 := local.Date()
+	if y1 == y2 && m1 == m2 && d1 == d2 {
+		return local.Format("15:04")
+	}
+	return local.Format("Mon 15:04")
 }
 
 // formatLocalTime parses an ISO 8601 timestamp and formats it in the local timezone.
