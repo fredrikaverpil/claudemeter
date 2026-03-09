@@ -53,7 +53,7 @@ const (
 )
 
 var (
-	debugLogFile         = filepath.Join(tempDir(), "claudeline-debug.log")
+	debugLogFile         = debugLogFilePath()
 	errRateLimited       = errors.New("rate limited")
 	errCachedRateLimited = errors.New("cached rate limit")
 	errCachedFailure     = errors.New("cached failure")
@@ -374,6 +374,18 @@ func tempDir() string {
 		return os.TempDir()
 	}
 	return "/tmp"
+}
+
+// debugLogFilePath returns the file path for the debug log.
+// When CLAUDE_CONFIG_DIR is set, a hash suffix is appended to avoid collisions between profiles.
+func debugLogFilePath() string {
+	base := filepath.Join(tempDir(), "claudeline-debug")
+	configDir := os.Getenv("CLAUDE_CONFIG_DIR")
+	if configDir == "" {
+		return base + ".log"
+	}
+	h := sha256.Sum256([]byte(configDir))
+	return fmt.Sprintf("%s-%x.log", base, h[:4])
 }
 
 // cacheFilePath returns the file path for the usage cache.
