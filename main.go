@@ -96,8 +96,7 @@ type cacheEntry struct {
 	Timestamp   int64           `json:"timestamp"`
 	OK          bool            `json:"ok"`
 	RateLimited bool            `json:"rate_limited,omitempty"`
-	// RetryAfter is a Unix timestamp; when non-zero, retry is allowed after this time.
-	RetryAfter int64 `json:"retry_after,omitempty"`
+	RetryAfter  int64           `json:"retry_after,omitempty"` // Unix timestamp; retry allowed after this time.
 }
 
 func main() {
