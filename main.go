@@ -96,7 +96,8 @@ type cacheEntry struct {
 	Timestamp   int64           `json:"timestamp"`
 	OK          bool            `json:"ok"`
 	RateLimited bool            `json:"rate_limited,omitempty"`
-	RetryAfter  int64           `json:"retry_after,omitempty"` // Unix timestamp; when non-zero, retry is allowed after this time.
+	// RetryAfter is a Unix timestamp; when non-zero, retry is allowed after this time.
+	RetryAfter int64 `json:"retry_after,omitempty"`
 }
 
 func main() {
@@ -577,7 +578,7 @@ func fetchUsageAPI(ctx context.Context, token string) (_ *usageResponse, retryAf
 		return nil, ra, err
 	}
 	log.Printf("retry-after=0, retrying once to verify")
-	usage, rawRetryAfter, err = doUsageRequest(ctx, token)
+	usage, _, err = doUsageRequest(ctx, token)
 	if err == nil {
 		return usage, 0, nil
 	}
