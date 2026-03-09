@@ -227,7 +227,7 @@ func run(cfg config) error {
 	}
 
 	// Usage bars.
-	var usage5h, usage7d string
+	var usage5h, usage7d, usageExtra string
 	token := creds.ClaudeAiOauth.AccessToken
 	if token == "" {
 		log.Printf("usage: no access token found")
@@ -240,17 +240,36 @@ func run(cfg config) error {
 			log.Printf("usage: %v", fetchErr)
 		}
 		if fetchErr == nil && usage != nil {
+			// 5-hour bar with label.
 			pct5 := int(math.Round(usage.FiveHour.Utilization))
-			usage5h = bar(pct5, quotaColor)
+			usage5h = "5h " + bar(pct5, quotaColor)
 			if reset := formatLocalTime(usage.FiveHour.ResetsAt, "15:04"); reset != "" {
 				usage5h += " (" + reset + ")"
 			}
 
+			// 7-day bar with label, plus per-model sub-bars.
 			pct7 := int(math.Round(usage.SevenDay.Utilization))
-			usage7d = bar(pct7, quotaColor)
+			usage7d = "7d " + bar(pct7, quotaColor)
 			if reset := formatLocalTime(usage.SevenDay.ResetsAt, "Mon 15:04"); reset != "" {
 				usage7d += " (" + reset + ")"
 			}
+			subSep := dim + " · " + ansiReset
+			for _, sub := range []struct {
+				q     *quotaLimit
+				label string
+			}{
+				{usage.SevenDaySonnet, "son"},
+				{usage.SevenDayOpus, "opus"},
+				{usage.SevenDayCowork, "cowork"},
+				{usage.SevenDayOAuthApp, "oauth"},
+			} {
+				if s := formatQuotaSubBar(sub.q, sub.label); s != "" {
+					usage7d += subSep + s
+				}
+			}
+
+			// Extra usage.
+			usageExtra = formatExtraUsage(usage.ExtraUsage)
 		}
 	}
 
@@ -273,6 +292,9 @@ func run(cfg config) error {
 	}
 	if usage7d != "" {
 		output += sep + usage7d
+	}
+	if usageExtra != "" {
+		output += sep + usageExtra
 	}
 
 	// Leading reset clears stale ANSI state from previous renders.
