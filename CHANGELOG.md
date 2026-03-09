@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.8.0](https://github.com/fredrikaverpil/claudeline/compare/v0.7.0...v0.8.0) (2026-03-09)
+
+
+### Features
+
+* cache rate-limited usage API responses with dedicated TTL ([#39](https://github.com/fredrikaverpil/claudeline/issues/39)) ([d4e4259](https://github.com/fredrikaverpil/claudeline/commit/d4e4259e7b99423a0efa74822a69bbff068865bc))
+
+
+### Bug Fixes
+
+* **cache:** prevent rate limit cache TTL from resetting on each call ([#42](https://github.com/fredrikaverpil/claudeline/issues/42)) ([0177f32](https://github.com/fredrikaverpil/claudeline/commit/0177f3263e8f2956ef2013b581493647e2c8039f))
+
 ## [0.7.0](https://github.com/fredrikaverpil/claudeline/compare/v0.6.0...v0.7.0) (2026-03-08)
 
 
