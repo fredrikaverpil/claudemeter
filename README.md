@@ -94,7 +94,9 @@ Key components:
   - **Dumb** (yellow, 41–60%) — quality starts to degrade
   - **Danger** (orange, 61–80%) — significant quality loss
   - **Near compaction** (red, 80%+) — approaching auto-compaction threshold
-- **Quota bars:** 5-char width using `█`/`░` (blue/magenta/red).
+- **Quota bars:** 5-char width using `█`/`░` (blue/magenta/red). Per-model
+  sub-bars (sonnet, opus, cowork, oauth) grouped under `7d` with `·`
+  sub-separator. Extra usage shown as `$used/$limit`.
 - **Compaction warning:** A yellow `⚠` appears on the context bar when usage is
   within 5% of the auto-compaction threshold (85% by default, configurable via
   `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE`).
