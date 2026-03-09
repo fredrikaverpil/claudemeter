@@ -587,6 +587,8 @@ func TestFormatExtraUsage(t *testing.T) {
 }
 
 func TestFormatQuotaSubBar(t *testing.T) {
+	now := time.Date(2026, 3, 9, 10, 0, 0, 0, time.UTC)
+
 	tests := []struct {
 		name  string
 		q     *quotaLimit
@@ -608,7 +610,7 @@ func TestFormatQuotaSubBar(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := formatQuotaSubBar(tt.q, tt.label)
+			got := formatQuotaSubBar(tt.q, tt.label, now)
 			if tt.q == nil {
 				if got != "" {
 					t.Errorf("formatQuotaSubBar(nil) = %q, want empty", got)

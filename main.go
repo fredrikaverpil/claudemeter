@@ -241,17 +241,18 @@ func run(cfg config) error {
 			log.Printf("usage: %v", fetchErr)
 		}
 		if fetchErr == nil && usage != nil {
+			now := time.Now()
 			// 5-hour bar with label.
 			pct5 := int(math.Round(usage.FiveHour.Utilization))
 			usage5h = "5h " + bar(pct5, quotaColor)
-			if reset := formatLocalTime(usage.FiveHour.ResetsAt, "15:04"); reset != "" {
+			if reset := formatResetTime(usage.FiveHour.ResetsAt, now); reset != "" {
 				usage5h += " (" + reset + ")"
 			}
 
 			// 7-day bar with label, plus per-model sub-bars.
 			pct7 := int(math.Round(usage.SevenDay.Utilization))
 			usage7d = "7d " + bar(pct7, quotaColor)
-			if reset := formatLocalTime(usage.SevenDay.ResetsAt, "Mon 15:04"); reset != "" {
+			if reset := formatResetTime(usage.SevenDay.ResetsAt, now); reset != "" {
 				usage7d += " (" + reset + ")"
 			}
 			subSep := dim + " · " + ansiReset
@@ -264,7 +265,7 @@ func run(cfg config) error {
 				{usage.SevenDayCowork, "cowork"},
 				{usage.SevenDayOAuthApp, "oauth"},
 			} {
-				if s := formatQuotaSubBar(sub.q, sub.label); s != "" {
+				if s := formatQuotaSubBar(sub.q, sub.label, now); s != "" {
 					usage7d += subSep + s
 					hasSubBars = true
 				}
@@ -438,13 +439,13 @@ func formatExtraUsage(extra *extraUsage) string {
 
 // formatQuotaSubBar renders a per-model quota bar with a trailing label.
 // Returns "" when the quota is nil.
-func formatQuotaSubBar(q *quotaLimit, label string) string {
+func formatQuotaSubBar(q *quotaLimit, label string, now time.Time) string {
 	if q == nil {
 		return ""
 	}
 	pct := int(math.Round(q.Utilization))
 	s := bar(pct, quotaColor) + " " + label
-	if reset := formatResetTime(q.ResetsAt, time.Now()); reset != "" {
+	if reset := formatResetTime(q.ResetsAt, now); reset != "" {
 		s += " (" + reset + ")"
 	}
 	return s
@@ -461,24 +462,12 @@ func formatResetTime(iso string, now time.Time) string {
 		return ""
 	}
 	local := target.Local()
-	y1, m1, d1 := now.Date()
+	y1, m1, d1 := now.Local().Date()
 	y2, m2, d2 := local.Date()
 	if y1 == y2 && m1 == m2 && d1 == d2 {
 		return local.Format("15:04")
 	}
 	return local.Format("Mon 15:04")
-}
-
-// formatLocalTime parses an ISO 8601 timestamp and formats it in the local timezone.
-func formatLocalTime(iso, layout string) string {
-	if iso == "" {
-		return ""
-	}
-	target, err := time.Parse(time.RFC3339, iso)
-	if err != nil {
-		return ""
-	}
-	return target.Local().Format(layout)
 }
 
 // keychainServiceName returns the macOS Keychain service name used by Claude Code.
