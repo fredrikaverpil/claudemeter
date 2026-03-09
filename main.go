@@ -743,8 +743,14 @@ func doUsageRequest(ctx context.Context, token string) (_ *usageResponse, rawRet
 		return nil, "", fmt.Errorf("unexpected status %d", resp.StatusCode)
 	}
 
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, "", fmt.Errorf("read response body: %w", err)
+	}
+	log.Printf("usage response: %s", body)
+
 	var usage usageResponse
-	if err := json.NewDecoder(resp.Body).Decode(&usage); err != nil {
+	if err := json.Unmarshal(body, &usage); err != nil {
 		return nil, "", fmt.Errorf("decode response: %w", err)
 	}
 	return &usage, "", nil
