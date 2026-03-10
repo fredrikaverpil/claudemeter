@@ -55,6 +55,50 @@ func TestCacheFilePath(t *testing.T) {
 	}
 }
 
+func TestDebugLogFilePath(t *testing.T) {
+	tests := []struct {
+		name            string
+		claudeConfigDir string
+		want            string
+	}{
+		{
+			name:            "no CLAUDE_CONFIG_DIR set",
+			claudeConfigDir: "",
+			want:            filepath.Join(tempDir(), "claudeline-debug.log"),
+		},
+		{
+			name:            "custom config dir claude-personal",
+			claudeConfigDir: "/Users/oa/.claude-personal",
+			want:            filepath.Join(tempDir(), "claudeline-debug-81c94270.log"),
+		},
+		{
+			name:            "custom config dir claude-work",
+			claudeConfigDir: "/Users/oa/.claude-work",
+			want:            filepath.Join(tempDir(), "claudeline-debug-1ef5702c.log"),
+		},
+		{
+			name:            "windows config dir claude-personal",
+			claudeConfigDir: `C:\Users\oa\.claude-personal`,
+			want:            filepath.Join(tempDir(), "claudeline-debug-9b705f7c.log"),
+		},
+		{
+			name:            "windows config dir claude-work",
+			claudeConfigDir: `C:\Users\oa\.claude-work`,
+			want:            filepath.Join(tempDir(), "claudeline-debug-34fd078b.log"),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Setenv("CLAUDE_CONFIG_DIR", tt.claudeConfigDir)
+			got := debugLogFilePath()
+			if got != tt.want {
+				t.Errorf("debugLogFilePath() = %q, want %q", got, tt.want)
+			}
+		})
+	}
+}
+
 func TestKeychainServiceName(t *testing.T) {
 	tests := []struct {
 		name            string
