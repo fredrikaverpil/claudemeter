@@ -595,21 +595,39 @@ func TestFormatQuotaSubBar(t *testing.T) {
 	now := time.Date(2026, 3, 9, 10, 0, 0, 0, time.UTC)
 
 	tests := []struct {
-		name  string
-		q     *quotaLimit
-		label string
-		want  string // just check it contains the label and percentage
+		name    string
+		q       *quotaLimit
+		label   string
+		wantPct string // expected percentage string in output.
 	}{
 		{
 			name:  "nil quota",
 			q:     nil,
 			label: "son",
-			want:  "",
 		},
 		{
-			name:  "sonnet at 12%",
-			q:     &quotaLimit{Utilization: 12, ResetsAt: "2026-03-09T13:00:00+00:00"},
-			label: "son",
+			name:    "sonnet at 12%",
+			q:       &quotaLimit{Utilization: 12, ResetsAt: "2026-03-09T13:00:00+00:00"},
+			label:   "son",
+			wantPct: "12%",
+		},
+		{
+			name:    "opus at 45%",
+			q:       &quotaLimit{Utilization: 45, ResetsAt: "2026-03-09T14:00:00+00:00"},
+			label:   "opus",
+			wantPct: "45%",
+		},
+		{
+			name:    "cowork at 5%",
+			q:       &quotaLimit{Utilization: 5, ResetsAt: "2026-03-10T08:00:00+00:00"},
+			label:   "cowork",
+			wantPct: "5%",
+		},
+		{
+			name:    "oauth at 0%",
+			q:       &quotaLimit{Utilization: 0, ResetsAt: "2026-03-10T08:00:00+00:00"},
+			label:   "oauth",
+			wantPct: "0%",
 		},
 	}
 
@@ -625,8 +643,8 @@ func TestFormatQuotaSubBar(t *testing.T) {
 			if !strings.Contains(got, tt.label) {
 				t.Errorf("formatQuotaSubBar() = %q, missing label %q", got, tt.label)
 			}
-			if !strings.Contains(got, "12%") {
-				t.Errorf("formatQuotaSubBar() = %q, missing percentage", got)
+			if !strings.Contains(got, tt.wantPct) {
+				t.Errorf("formatQuotaSubBar() = %q, missing percentage %q", got, tt.wantPct)
 			}
 		})
 	}
