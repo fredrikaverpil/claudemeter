@@ -1,8 +1,9 @@
 # claudeline
 
-A minimalistic and opinionated Claude Code status line.
+A minimalistic and opinionated Claude Code status line. 
+ 
+<img width="930" height="112" alt="claudeline" src="https://github.com/user-attachments/assets/51ab601c-760a-41da-8dca-d682bf7ad138" />
 
-<img width="657" height="147" alt="claudeline" src="https://github.com/user-attachments/assets/5e520190-1d0f-4a61-9694-62e87d3410a4" />
 
 It displays the current Anthropic model, subscription plan, context window
 usage, and 5-hour/7-day quota usage as ANSI-colored progress bars. Written in Go
