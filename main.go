@@ -259,7 +259,7 @@ func run(cfg config) error {
 				q     *quotaLimit
 				label string
 			}{
-				{usage.SevenDaySonnet, "son"},
+				{usage.SevenDaySonnet, "sonnet"},
 				{usage.SevenDayOpus, "opus"},
 				{usage.SevenDayCowork, "cowork"},
 				{usage.SevenDayOAuthApp, "oauth"},

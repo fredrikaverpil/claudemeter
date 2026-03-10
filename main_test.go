@@ -603,12 +603,12 @@ func TestFormatQuotaSubBar(t *testing.T) {
 		{
 			name:  "nil quota",
 			q:     nil,
-			label: "son",
+			label: "sonnet",
 		},
 		{
 			name:    "sonnet at 12%",
 			q:       &quotaLimit{Utilization: 12, ResetsAt: "2026-03-09T13:00:00+00:00"},
-			label:   "son",
+			label:   "sonnet",
 			wantPct: "12%",
 		},
 		{
