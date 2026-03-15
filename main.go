@@ -521,7 +521,9 @@ func readCredentials(ctx context.Context) (credentials, error) {
 		}
 		configDir = filepath.Join(home, ".claude")
 	}
-	data, err := os.ReadFile(filepath.Join(configDir, ".credentials.json"))
+	data, err := os.ReadFile( //nolint:gosec // path is from trusted source
+		filepath.Join(configDir, ".credentials.json"),
+	)
 	if err != nil {
 		return credentials{}, fmt.Errorf("read credentials file: %w", err)
 	}
