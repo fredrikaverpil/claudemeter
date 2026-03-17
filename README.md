@@ -9,6 +9,9 @@ A minimalistic and opinionated Claude Code status line.
 <img width="930" height="112" alt="claudeline" src="https://github.com/user-attachments/assets/51ab601c-760a-41da-8dca-d682bf7ad138" />
 
 
+<img width="930" height="112" alt="image" src="https://github.com/user-attachments/assets/ce5cf8e1-9089-4a68-b82b-9527be87b2c8" />
+
+
 It displays the current Anthropic model, subscription plan, context window
 usage, and 5-hour/7-day quota usage as ANSI-colored progress bars. Written in Go
 with no external dependencies (stdlib only).
