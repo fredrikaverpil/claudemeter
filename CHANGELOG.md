@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.10.0](https://github.com/fredrikaverpil/claudeline/compare/v0.9.0...v0.10.0) (2026-03-17)
+
+
+### Features
+
+* add enterprise plan support ([#51](https://github.com/fredrikaverpil/claudeline/issues/51)) ([dd7f763](https://github.com/fredrikaverpil/claudeline/commit/dd7f7637fc3e24ed547e9ffcac89f0f4f7405d9a))
+
 ## [0.9.0](https://github.com/fredrikaverpil/claudeline/compare/v0.8.1...v0.9.0) (2026-03-10)
 
 
