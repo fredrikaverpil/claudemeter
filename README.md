@@ -131,6 +131,25 @@ This project uses [Pocket](https://github.com/fredrikaverpil/pocket), a
 Makefile-like task runner. Run `./pok` to execute linting, formatting, and
 tests.
 
+### Capturing and rendering
+
+1. Start Claude Code with `claudeline -debug`, make sure claudeline shows up.
+2. In a new terminal, run `./pok capture` (or
+   `./pok capture -config-dir ~/.claude-work` for a custom profile). This will
+   produce a `testdata/*.json` file.
+3. To render claudeline based on the json file, run `./pok render` (or e.g.
+   `./pok render -json testdata/stdin_v2.1.80_pro_opus.json` for a specific
+   file).
+
+### Stdin payload schema
+
+The `testdata/stdin_*.json` files are named as
+`stdin_<version>_<plan>_<model>.json`. A comprehensive `stdinPayload` struct in
+`main_test.go` maps every known field. The `TestStdinPayloadSchema` test uses
+`DisallowUnknownFields` to detect when Claude Code adds new fields — if the test
+fails, update the `stdinPayload` struct and re-run `./pok capture` to refresh
+the testdata.
+
 ## References
 
 - [claude-hud](https://github.com/jarrodwatts/claude-hud) — inspiration for this

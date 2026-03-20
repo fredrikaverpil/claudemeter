@@ -64,6 +64,7 @@ var (
 )
 
 // stdinData is the JSON structure received from Claude Code via stdin.
+// See stdinPayload in main_test.go for the full schema.
 type stdinData struct {
 	Cwd   string `json:"cwd"`
 	Model struct {
@@ -210,6 +211,8 @@ func run(cfg config) error {
 	if err != nil {
 		return fmt.Errorf("read stdin: %w", err)
 	}
+
+	log.Printf("raw stdin: %s", input)
 
 	var data stdinData
 	if err := json.Unmarshal(input, &data); err != nil {

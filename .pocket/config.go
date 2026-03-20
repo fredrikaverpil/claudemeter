@@ -18,4 +18,8 @@ var Config = &pk.Config{
 			}),
 		),
 	),
+	Manual: []pk.Runnable{
+		Render,
+		Capture,
+	},
 }
