@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"errors"
+	"maps"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -154,9 +155,7 @@ func flattenJSON(prefix string, m map[string]any) map[string]any {
 			key = prefix + "." + k
 		}
 		if nested, ok := v.(map[string]any); ok {
-			for nk, nv := range flattenJSON(key, nested) {
-				result[nk] = nv
-			}
+			maps.Copy(result, flattenJSON(key, nested))
 		} else {
 			result[key] = v
 		}
