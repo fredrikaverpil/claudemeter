@@ -60,7 +60,7 @@ with no external dependencies (stdlib only).
 
 | Flag                  | Default | Description                                          |
 | --------------------- | ------- | ---------------------------------------------------- |
-| `-debug`              | `false` | Write warnings/errors to `/tmp/claudeline-debug.log` |
+| `-debug`              | `false` | Write warnings/errors to `/tmp/claudeline/debug.log` |
 | `-cwd`                | `false` | Show working directory name in the status line       |
 | `-cwd-max-len`        | `30`    | Max display length for working directory name        |
 | `-git-branch`         | `false` | Show git branch in the status line                   |
@@ -94,7 +94,7 @@ Key components:
   the file fallback. Failure is non-fatal (usage bars are omitted).
 - **Usage API:** `GET https://api.anthropic.com/api/oauth/usage` with OAuth
   bearer token. 5-second HTTP timeout.
-- **File-based cache:** `/tmp/claudeline-usage.json` with 60s TTL on success,
+- **File-based cache:** `/tmp/claudeline/usage.json` with 60s TTL on success,
   15s TTL on failure.
 - **Context bar:** 5-char width using `█`/`░` with four color zones inspired by
   [Dax Horthy's "dumb zone" theory](https://www.youtube.com/watch?v=rmvDxxNubIg&t=493s)
@@ -112,7 +112,7 @@ Key components:
   `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE`).
 - **Service status:** Fetches `https://status.claude.com/api/v2/status.json`
   (Atlassian Statuspage API, no auth required). Cached in
-  `/tmp/claudeline-status.json` with 2min OK TTL, 30s fail TTL. Shows an orange
+  `/tmp/claudeline/status.json` with 2min OK TTL, 30s fail TTL. Shows an orange
   fire icon with severity bars when there is a disruption: `🔥▂` (minor), `🔥▄▂`
   (major), `🔥▆▄▂` (critical). Hidden when all systems are operational.
 - **Working directory:** Last path segment from `cwd` in stdin JSON, opt-in with
@@ -121,8 +121,8 @@ Key components:
   `-git-branch`.
 - **Custom .claude folder**: Support `CLAUDE_CONFIG_DIR`.
 - **Debug mode:** Pass `-debug` to write warnings and errors to
-  `/tmp/claudeline-debug.log`. Set the statusline command to
-  `claudeline -debug`, then `tail -f /tmp/claudeline-debug.log` in another
+  `/tmp/claudeline/debug.log`. Set the statusline command to
+  `claudeline -debug`, then `tail -f /tmp/claudeline/debug.log` in another
   terminal.
 
 ## Development

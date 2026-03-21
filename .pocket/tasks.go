@@ -69,9 +69,9 @@ type CaptureFlags struct {
 // it as a testdata file.
 //
 // The config-dir flag determines which profile to capture from:
-//   - Default (~/.claude): debug log at /tmp/claudeline-debug.log
+//   - Default (~/.claude): debug log at /tmp/claudeline/debug.log
 //   - Custom (e.g. ~/.claude-work): debug log with a hash suffix,
-//     e.g. /tmp/claudeline-debug-fbb791ba.log
+//     e.g. /tmp/claudeline/debug-fbb791ba.log
 //
 // For each profile, the task:
 //  1. Extracts the last "raw stdin:" line (the most recent payload from Claude Code)
@@ -103,7 +103,7 @@ var Capture = &pk.Task{
 		}
 
 		// Read the debug log.
-		logPath := filepath.Join(claudelineTempDir(), "claudeline-debug"+suffix+".log")
+		logPath := filepath.Join(claudelineCacheDir(), "debug"+suffix+".log")
 		data, err := os.ReadFile(logPath)
 		if err != nil {
 			return fmt.Errorf("read debug log %s: %w — run claudeline with -debug first", logPath, err)
@@ -214,12 +214,13 @@ func setNestedString(m map[string]any, value, key string) {
 	}
 }
 
-// claudelineTempDir mirrors claudeline's tempDir() — /tmp on non-Windows.
-func claudelineTempDir() string {
+// claudelineCacheDir mirrors claudeline's cacheDir() — /tmp/claudeline on non-Windows.
+func claudelineCacheDir() string {
+	base := "/tmp"
 	if runtime.GOOS == "windows" {
-		return os.TempDir()
+		base = os.TempDir()
 	}
-	return "/tmp"
+	return filepath.Join(base, "claudeline")
 }
 
 // resolvePlanName reads credentials for a specific config dir and returns the

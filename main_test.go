@@ -207,136 +207,67 @@ func TestStdinPayloadSchema(t *testing.T) {
 	}
 }
 
-func TestCacheFilePath(t *testing.T) {
+func TestConfigDirSuffix(t *testing.T) {
 	tests := []struct {
 		name            string
 		claudeConfigDir string
-		want            string
+		wantSuffix      string
 	}{
 		{
 			name:            "no CLAUDE_CONFIG_DIR set",
 			claudeConfigDir: "",
-			want:            filepath.Join(tempDir(), "claudeline-usage.json"),
+			wantSuffix:      "",
 		},
 		{
 			name:            "custom config dir claude-personal",
 			claudeConfigDir: "/Users/oa/.claude-personal",
-			want:            filepath.Join(tempDir(), "claudeline-usage-81c94270.json"),
+			wantSuffix:      "-81c94270",
 		},
 		{
 			name:            "custom config dir claude-work",
 			claudeConfigDir: "/Users/oa/.claude-work",
-			want:            filepath.Join(tempDir(), "claudeline-usage-1ef5702c.json"),
+			wantSuffix:      "-1ef5702c",
 		},
 		{
 			name:            "windows config dir claude-personal",
 			claudeConfigDir: `C:\Users\oa\.claude-personal`,
-			want:            filepath.Join(tempDir(), "claudeline-usage-9b705f7c.json"),
+			wantSuffix:      "-9b705f7c",
 		},
 		{
 			name:            "windows config dir claude-work",
 			claudeConfigDir: `C:\Users\oa\.claude-work`,
-			want:            filepath.Join(tempDir(), "claudeline-usage-34fd078b.json"),
+			wantSuffix:      "-34fd078b",
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Setenv("CLAUDE_CONFIG_DIR", tt.claudeConfigDir)
-			got := cacheFilePath()
-			if got != tt.want {
-				t.Errorf("cacheFilePath() = %q, want %q", got, tt.want)
+			got := configDirSuffix()
+			if got != tt.wantSuffix {
+				t.Errorf("configDirSuffix() = %q, want %q", got, tt.wantSuffix)
 			}
 		})
 	}
-}
 
-func TestDebugLogFilePath(t *testing.T) {
-	tests := []struct {
-		name            string
-		claudeConfigDir string
-		want            string
-	}{
-		{
-			name:            "no CLAUDE_CONFIG_DIR set",
-			claudeConfigDir: "",
-			want:            filepath.Join(tempDir(), "claudeline-debug.log"),
-		},
-		{
-			name:            "custom config dir claude-personal",
-			claudeConfigDir: "/Users/oa/.claude-personal",
-			want:            filepath.Join(tempDir(), "claudeline-debug-81c94270.log"),
-		},
-		{
-			name:            "custom config dir claude-work",
-			claudeConfigDir: "/Users/oa/.claude-work",
-			want:            filepath.Join(tempDir(), "claudeline-debug-1ef5702c.log"),
-		},
-		{
-			name:            "windows config dir claude-personal",
-			claudeConfigDir: `C:\Users\oa\.claude-personal`,
-			want:            filepath.Join(tempDir(), "claudeline-debug-9b705f7c.log"),
-		},
-		{
-			name:            "windows config dir claude-work",
-			claudeConfigDir: `C:\Users\oa\.claude-work`,
-			want:            filepath.Join(tempDir(), "claudeline-debug-34fd078b.log"),
-		},
-	}
+	// Verify the suffix is correctly wired into each path/name function.
+	t.Run("wiring", func(t *testing.T) {
+		t.Setenv("CLAUDE_CONFIG_DIR", "/Users/oa/.claude-work")
+		suffix := configDirSuffix()
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			t.Setenv("CLAUDE_CONFIG_DIR", tt.claudeConfigDir)
-			got := debugLogFilePath()
-			if got != tt.want {
-				t.Errorf("debugLogFilePath() = %q, want %q", got, tt.want)
-			}
-		})
-	}
-}
-
-func TestKeychainServiceName(t *testing.T) {
-	tests := []struct {
-		name            string
-		claudeConfigDir string
-		want            string
-	}{
-		{
-			name:            "no CLAUDE_CONFIG_DIR set",
-			claudeConfigDir: "",
-			want:            "Claude Code-credentials",
-		},
-		{
-			name:            "custom config dir claude-personal",
-			claudeConfigDir: "/Users/oa/.claude-personal",
-			want:            "Claude Code-credentials-81c94270",
-		},
-		{
-			name:            "custom config dir claude-work",
-			claudeConfigDir: "/Users/oa/.claude-work",
-			want:            "Claude Code-credentials-1ef5702c",
-		},
-		{
-			name:            "windows config dir claude-personal",
-			claudeConfigDir: `C:\Users\oa\.claude-personal`,
-			want:            "Claude Code-credentials-9b705f7c",
-		},
-		{
-			name:            "windows config dir claude-work",
-			claudeConfigDir: `C:\Users\oa\.claude-work`,
-			want:            "Claude Code-credentials-34fd078b",
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			t.Setenv("CLAUDE_CONFIG_DIR", tt.claudeConfigDir)
-			got := keychainServiceName()
-			if got != tt.want {
-				t.Errorf("keychainServiceName() = %q, want %q", got, tt.want)
-			}
-		})
-	}
+		if got := cacheFilePath(); got != filepath.Join(cacheDir(), "usage"+suffix+".json") {
+			t.Errorf("cacheFilePath() = %q, want suffix %q", got, suffix)
+		}
+		if got := debugLogFilePath(); got != filepath.Join(cacheDir(), "debug"+suffix+".log") {
+			t.Errorf("debugLogFilePath() = %q, want suffix %q", got, suffix)
+		}
+		if got := statusCacheFilePath(); got != filepath.Join(cacheDir(), "status"+suffix+".json") {
+			t.Errorf("statusCacheFilePath() = %q, want suffix %q", got, suffix)
+		}
+		if got := keychainServiceName(); got != "Claude Code-credentials"+suffix {
+			t.Errorf("keychainServiceName() = %q, want suffix %q", got, suffix)
+		}
+	})
 }
 
 func TestCompactName(t *testing.T) {
@@ -490,6 +421,9 @@ func TestReadCacheRateLimited(t *testing.T) {
 	// Use a unique CLAUDE_CONFIG_DIR to isolate the cache file per test.
 	dir := t.TempDir()
 	t.Setenv("CLAUDE_CONFIG_DIR", dir)
+	if err := os.MkdirAll(cacheDir(), 0o700); err != nil {
+		t.Fatalf("create cache dir: %v", err)
+	}
 	cachePath := cacheFilePath()
 	t.Cleanup(func() { os.Remove(cachePath) })
 
@@ -1025,40 +959,6 @@ func TestFormatResetTime(t *testing.T) {
 	}
 }
 
-func TestStatusCacheFilePath(t *testing.T) {
-	tests := []struct {
-		name            string
-		claudeConfigDir string
-		want            string
-	}{
-		{
-			name:            "no CLAUDE_CONFIG_DIR set",
-			claudeConfigDir: "",
-			want:            filepath.Join(tempDir(), "claudeline-status.json"),
-		},
-		{
-			name:            "custom config dir claude-personal",
-			claudeConfigDir: "/Users/oa/.claude-personal",
-			want:            filepath.Join(tempDir(), "claudeline-status-81c94270.json"),
-		},
-		{
-			name:            "custom config dir claude-work",
-			claudeConfigDir: "/Users/oa/.claude-work",
-			want:            filepath.Join(tempDir(), "claudeline-status-1ef5702c.json"),
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			t.Setenv("CLAUDE_CONFIG_DIR", tt.claudeConfigDir)
-			got := statusCacheFilePath()
-			if got != tt.want {
-				t.Errorf("statusCacheFilePath() = %q, want %q", got, tt.want)
-			}
-		})
-	}
-}
-
 func TestFormatStatusIndicator(t *testing.T) {
 	tests := []struct {
 		name   string
@@ -1135,6 +1035,9 @@ func TestFormatStatusIndicator(t *testing.T) {
 func TestReadStatusCache(t *testing.T) {
 	dir := t.TempDir()
 	t.Setenv("CLAUDE_CONFIG_DIR", dir)
+	if err := os.MkdirAll(cacheDir(), 0o700); err != nil {
+		t.Fatalf("create cache dir: %v", err)
+	}
 	cachePath := statusCacheFilePath()
 	t.Cleanup(func() { os.Remove(cachePath) })
 

@@ -180,7 +180,12 @@ func runMain() int {
 
 	log.SetPrefix("claudeline: ")
 	log.SetFlags(log.Ldate | log.Ltime)
+	_ = os.MkdirAll(cacheDir(), 0o700)
 	if *debug {
+		// Truncate if over 256KB to prevent unbounded growth.
+		if info, err := os.Stat(debugLogFile); err == nil && info.Size() > 256*1024 {
+			_ = os.Truncate(debugLogFile, 0)
+		}
 		f, err := os.OpenFile(debugLogFile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o600)
 		if err == nil {
 			log.SetOutput(f)
@@ -491,12 +496,14 @@ func keychainServiceName() string {
 	return "Claude Code-credentials" + configDirSuffix()
 }
 
-// tempDir returns /tmp on Unix systems and the OS temp directory on Windows.
-func tempDir() string {
+// cacheDir returns the directory for claudeline cache and log files.
+// Uses /tmp/claudeline on Unix and os.TempDir()/claudeline on Windows.
+func cacheDir() string {
+	base := "/tmp"
 	if runtime.GOOS == "windows" {
-		return os.TempDir()
+		base = os.TempDir()
 	}
-	return "/tmp"
+	return filepath.Join(base, "claudeline")
 }
 
 // configDirSuffix returns a hash-based suffix when CLAUDE_CONFIG_DIR is set,
@@ -513,18 +520,18 @@ func configDirSuffix() string {
 // debugLogFilePath returns the file path for the debug log.
 // When CLAUDE_CONFIG_DIR is set, a hash suffix is appended to avoid collisions between profiles.
 func debugLogFilePath() string {
-	return filepath.Join(tempDir(), "claudeline-debug"+configDirSuffix()+".log")
+	return filepath.Join(cacheDir(), "debug"+configDirSuffix()+".log")
 }
 
 // cacheFilePath returns the file path for the usage cache.
 // When CLAUDE_CONFIG_DIR is set, a hash suffix is appended to avoid collisions between profiles.
 func cacheFilePath() string {
-	return filepath.Join(tempDir(), "claudeline-usage"+configDirSuffix()+".json")
+	return filepath.Join(cacheDir(), "usage"+configDirSuffix()+".json")
 }
 
 // statusCacheFilePath returns the file path for the status cache.
 func statusCacheFilePath() string {
-	return filepath.Join(tempDir(), "claudeline-status"+configDirSuffix()+".json")
+	return filepath.Join(cacheDir(), "status"+configDirSuffix()+".json")
 }
 
 // fetchStatus fetches the service status from the Atlassian Statuspage API with caching.
