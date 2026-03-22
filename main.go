@@ -12,13 +12,14 @@ import (
 	"math"
 	"net/http"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"runtime"
 	runtimedebug "runtime/debug"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/fredrikaverpil/claudeline/internal/creds"
 )
 
 // version and commit are set via ldflags by goreleaser.
@@ -73,14 +74,6 @@ type stdinData struct {
 	ContextWindow struct {
 		UsedPercentage *float64 `json:"used_percentage"`
 	} `json:"context_window"`
-}
-
-// credentials is the OAuth credentials structure.
-type credentials struct {
-	ClaudeAiOauth struct {
-		AccessToken      string `json:"accessToken"`
-		SubscriptionType string `json:"subscriptionType"`
-	} `json:"claudeAiOauth"`
 }
 
 // quotaLimit is a single usage quota with utilization percentage and reset time.
@@ -225,14 +218,14 @@ func run(cfg config) error {
 	}
 
 	// Read credentials.
-	creds, err := readCredentials(ctx)
+	cred, err := creds.Read(ctx, os.Getenv("CLAUDE_CONFIG_DIR"), keychainServiceName())
 	if err != nil {
 		log.Printf("credentials: %v", err)
-		creds = credentials{}
+		cred = creds.Credentials{}
 	}
 
 	// Determine plan name.
-	plan := planName(creds.ClaudeAiOauth.SubscriptionType)
+	plan := creds.PlanName(cred.ClaudeAiOauth.SubscriptionType)
 
 	// Build identity segment.
 	identity := buildIdentity(data.Model.DisplayName, plan)
@@ -255,13 +248,13 @@ func run(cfg config) error {
 
 	// Usage bars.
 	var usage5h, usage7d, usageExtra string
-	token := creds.ClaudeAiOauth.AccessToken
+	token := cred.ClaudeAiOauth.AccessToken
 	if token == "" {
 		log.Printf("usage: no access token found")
 	} else if plan == "" {
 		log.Printf(
 			"usage: unknown subscription type %q, expected pro/max/team/enterprise",
-			creds.ClaudeAiOauth.SubscriptionType,
+			cred.ClaudeAiOauth.SubscriptionType,
 		)
 	}
 	if token != "" && plan != "" {
@@ -369,23 +362,6 @@ func buildIdentity(model, plan string) string {
 		return cyan + "[" + model + " | " + plan + "]" + ansiReset
 	case model != "":
 		return cyan + "[" + model + "]" + ansiReset
-	default:
-		return ""
-	}
-}
-
-// planName maps a subscription type to a display name.
-func planName(subType string) string {
-	lower := strings.ToLower(subType)
-	switch {
-	case strings.Contains(lower, "max"):
-		return "Max"
-	case strings.Contains(lower, "pro"):
-		return "Pro"
-	case strings.Contains(lower, "team"):
-		return "Team"
-	case strings.Contains(lower, "enterprise"):
-		return "Enterprise"
 	default:
 		return ""
 	}
@@ -656,48 +632,6 @@ func formatStatusIndicator(status *statusResponse) string {
 	default:
 		return ""
 	}
-}
-
-// readCredentials reads OAuth credentials from keychain or file.
-func readCredentials(ctx context.Context) (credentials, error) {
-	// Try macOS keychain first.
-	if runtime.GOOS == "darwin" {
-		serviceName := keychainServiceName()
-		ctx, cancel := context.WithTimeout(ctx, ioTimeout)
-		defer cancel()
-		out, err := exec.CommandContext(ctx,
-			"/usr/bin/security", "find-generic-password",
-			"-s", serviceName, "-w",
-		).Output()
-		if err == nil {
-			var creds credentials
-			if err := json.Unmarshal(out, &creds); err != nil {
-				return credentials{}, fmt.Errorf("parse keychain credentials: %w", err)
-			}
-			return creds, nil
-		}
-	}
-
-	// File fallback.
-	configDir := os.Getenv("CLAUDE_CONFIG_DIR")
-	if configDir == "" {
-		home, err := os.UserHomeDir()
-		if err != nil {
-			return credentials{}, fmt.Errorf("get home dir: %w", err)
-		}
-		configDir = filepath.Join(home, ".claude")
-	}
-	data, err := os.ReadFile( //nolint:gosec // path is from trusted source
-		filepath.Join(configDir, ".credentials.json"),
-	)
-	if err != nil {
-		return credentials{}, fmt.Errorf("read credentials file: %w", err)
-	}
-	var creds credentials
-	if err := json.Unmarshal(data, &creds); err != nil {
-		return credentials{}, fmt.Errorf("parse credentials file: %w", err)
-	}
-	return creds, nil
 }
 
 // getBranch returns the current git branch name, or "" if not in a git repo.
