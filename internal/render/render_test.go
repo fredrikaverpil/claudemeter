@@ -374,8 +374,13 @@ func TestIdentity(t *testing.T) {
 		model, plan string
 		want        string
 	}{
-		{name: "model and plan", model: "Opus", plan: "Pro", want: Cyan + "[Opus | Pro]" + Reset},
-		{name: "model only", model: "Sonnet", plan: "", want: Cyan + "[Sonnet]" + Reset},
+		{
+			name:  "model and plan",
+			model: "Opus",
+			plan:  "Pro",
+			want:  Cyan + "Pro" + Reset + Dim + " │ " + Reset + Cyan + "Opus" + Reset,
+		},
+		{name: "model only", model: "Sonnet", plan: "", want: Cyan + "Sonnet" + Reset},
 		{name: "both empty", model: "", plan: "", want: ""},
 		{name: "plan only returns empty", model: "", plan: "Pro", want: ""},
 	}

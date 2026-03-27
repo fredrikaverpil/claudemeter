@@ -69,13 +69,13 @@ func QuotaColor(pct int) string {
 	}
 }
 
-// Identity returns the "[Model | Plan]" segment.
+// Identity returns the "Plan | Model" segment.
 func Identity(model, plan string) string {
 	switch {
 	case model != "" && plan != "":
-		return Cyan + "[" + model + " | " + plan + "]" + Reset
+		return Cyan + plan + Reset + Dim + " │ " + Reset + Cyan + model + Reset
 	case model != "":
-		return Cyan + "[" + model + "]" + Reset
+		return Cyan + model + Reset
 	default:
 		return ""
 	}
