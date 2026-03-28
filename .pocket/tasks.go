@@ -19,8 +19,8 @@ import (
 
 // RenderFlags holds flags for the Render task.
 type RenderFlags struct {
-	JSON       string `flag:"json" usage:"path to a specific testdata JSON file"`
-	UsageFile  string `flag:"usage-file" usage:"path to usage testdata JSON file"`
+	JSON       string `flag:"json"        usage:"path to a specific testdata JSON file"`
+	UsageFile  string `flag:"usage-file"  usage:"path to usage testdata JSON file"`
 	StatusFile string `flag:"status-file" usage:"path to status testdata JSON file"`
 	UpdateFile string `flag:"update-file" usage:"path to update testdata JSON file"`
 }
@@ -76,7 +76,14 @@ var Render = &pk.Task{
 				usageFile = filepath.Join(dir, flags.UsageFile)
 			}
 			updateFile := filepath.Join(dir, flags.UpdateFile)
-			args := fmt.Sprintf("cat %s | %s -status-file %s -usage-file %s -update-file %s", f, bin, statusFile, usageFile, updateFile)
+			args := fmt.Sprintf(
+				"cat %s | %s -status-file %s -usage-file %s -update-file %s",
+				f,
+				bin,
+				statusFile,
+				usageFile,
+				updateFile,
+			)
 
 			cmd := exec.CommandContext(ctx, "sh", "-c", args)
 			cmd.Dir = dir
@@ -395,14 +402,15 @@ func resolvePlanName(ctx context.Context, configDir string) (string, error) {
 }
 
 // planName mirrors claudeline's planName() but returns lowercase for filenames.
-// TODO: add case for "free" plan (we don't know the key yet)
 func planName(subType string) string {
 	lower := strings.ToLower(subType)
 	switch {
-	case strings.Contains(lower, "max"):
-		return "max"
+	case strings.Contains(lower, "free"):
+		return "free"
 	case strings.Contains(lower, "pro"):
 		return "pro"
+	case strings.Contains(lower, "max"):
+		return "max"
 	case strings.Contains(lower, "team"):
 		return "team"
 	case strings.Contains(lower, "enterprise"):

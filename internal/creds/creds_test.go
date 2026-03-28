@@ -144,12 +144,13 @@ func TestPlanName(t *testing.T) {
 		subType string
 		want    string
 	}{
-		{name: "max", subType: "claude_max_monthly", want: "Max"},
+		{name: "free", subType: "claude_free_plan", want: "Free"},
 		{name: "pro", subType: "claude_pro_monthly", want: "Pro"},
+		{name: "max", subType: "claude_max_monthly", want: "Max"},
 		{name: "team", subType: "team_monthly", want: "Team"},
 		{name: "enterprise", subType: "enterprise_annual", want: "Enterprise"},
 		{name: "empty", subType: "", want: ""},
-		{name: "unknown", subType: "free", want: ""},
+		{name: "unknown", subType: "unknown", want: ""},
 		{name: "case_insensitive", subType: "CLAUDE_PRO_MONTHLY", want: "Pro"},
 	}
 	for _, tt := range tests {

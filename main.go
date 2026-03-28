@@ -162,6 +162,9 @@ func run(cfg config) error {
 			log.Printf("credentials: %v", err)
 		}
 		plan = creds.PlanName(cred.ClaudeAiOauth.SubscriptionType)
+		if plan == "" {
+			plan = "Unknown plan"
+		}
 	}
 
 	// Build identity segment.
