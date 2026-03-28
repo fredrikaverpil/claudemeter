@@ -21,13 +21,13 @@ with no external dependencies (stdlib only).
 
 ## Legend
 
-| Indicator            | Meaning                                                     |
-| -------------------- | ----------------------------------------------------------- |
-| `⚡️`                 | Peak hours: 5-hour limit burns faster than normal           |
-| `⚠️`                 | Approaching auto-compaction threshold                       |
-| `🥵`                 | Extended context (>200k tokens) — model quality may degrade |
-| `↑`                  | New `claudeline` update available                           |
-| `🔥▂` `🔥▄▂` `🔥▆▄▂` | Anthropic service disruption (minor / major / critical)     |
+| Indicator            | Meaning                                                                                                      |
+| -------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `⚡️`                 | Peak hours: 5-hour limit burns [faster than normal](https://xcancel.com/trq212/status/2037254607001559305#m) |
+| `⚠️`                 | Approaching auto-compaction threshold                                                                        |
+| `🥵`                 | Extended context (>200k tokens) — model quality may degrade                                                  |
+| `🔥▂` `🔥▄▂` `🔥▆▄▂` | Anthropic service disruption (minor / major / critical)                                                      |
+| `↑`                  | New `claudeline` update available                                                                            |
 
 ## Installation
 
