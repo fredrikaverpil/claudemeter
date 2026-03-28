@@ -14,10 +14,9 @@ import (
 // The peak window is weekdays 13:00–19:00 UTC.
 //
 // Source: https://xcancel.com/trq212/status/2037254607001559305#m
-// TODO: add case for "free" plan (we don't know the key yet).
 func IsPeakHours(t time.Time, subType string) bool {
 	lower := strings.ToLower(subType)
-	if !strings.Contains(lower, "pro") && !strings.Contains(lower, "max") {
+	if !strings.Contains(lower, "free") && !strings.Contains(lower, "pro") && !strings.Contains(lower, "max") {
 		return false
 	}
 	utc := t.UTC()
