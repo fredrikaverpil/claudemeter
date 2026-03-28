@@ -223,6 +223,32 @@ func TestProvider(t *testing.T) {
 	}
 }
 
+func TestIsThirdPartyProvider(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		provider string
+		want     bool
+	}{
+		{"Bedrock", true},
+		{"Vertex", true},
+		{"Foundry", true},
+		{"API", false},
+		{"", false},
+		{"Pro", false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.provider, func(t *testing.T) {
+			t.Parallel()
+
+			got := IsThirdPartyProvider(tt.provider)
+			if got != tt.want {
+				t.Errorf("IsThirdPartyProvider(%q) = %v, want %v", tt.provider, got, tt.want)
+			}
+		})
+	}
+}
+
 func TestPlanName(t *testing.T) {
 	t.Parallel()
 

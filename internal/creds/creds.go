@@ -83,6 +83,18 @@ func Provider() string {
 	}
 }
 
+// IsThirdPartyProvider reports whether the provider uses non-Anthropic
+// infrastructure (e.g. AWS Bedrock, GCP Vertex, Azure Foundry).
+// status.claude.com is not relevant for these providers.
+func IsThirdPartyProvider(provider string) bool {
+	switch provider {
+	case "Bedrock", "Vertex", "Foundry":
+		return true
+	default:
+		return false
+	}
+}
+
 // PlanName maps a subscription type to a display name.
 func PlanName(subType string) string {
 	lower := strings.ToLower(subType)

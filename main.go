@@ -232,6 +232,10 @@ func run(cfg config) error {
 	})
 
 	wg.Go(func() {
+		// Skip status.claude.com for providers with their own infrastructure.
+		if creds.IsThirdPartyProvider(plan) {
+			return
+		}
 		if cfg.statusFile != "" {
 			resp, err := status.ReadResponse(cfg.statusFile)
 			if err != nil {
