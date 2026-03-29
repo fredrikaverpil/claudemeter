@@ -104,8 +104,8 @@ func IsThirdPartyProvider(provider string) bool {
 	return thirdPartyProviders[provider]
 }
 
-// PlanName maps a subscription type to a display name.
-func PlanName(subType string) string {
+// SubscriptionType maps a subscription type to a display name.
+func SubscriptionType(subType string) string {
 	lower := strings.ToLower(subType)
 	switch {
 	case strings.Contains(lower, "free"):

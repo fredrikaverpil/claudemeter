@@ -138,55 +138,22 @@ func runMain() int {
 func run(cfg config) error {
 	ctx := context.Background()
 
-	// Read stdin JSON.
-	input, err := io.ReadAll(os.Stdin)
+	data, err := readStdin(cfg)
 	if err != nil {
-		return fmt.Errorf("read stdin: %w", err)
+		return err
 	}
-	if cfg.debug {
-		_ = os.WriteFile(stdinFilePath(), input, 0o600)
-	}
-	data, err := stdin.Parse(input)
-	if err != nil {
-		return fmt.Errorf("parse stdin: %w", err)
-	}
+	cred, sub, isProvider := resolveCredentials(ctx, cfg)
 
-	// Determine plan. API providers (Bedrock, Vertex, Foundry, API key) are
-	// detected from environment variables and skip credential resolution
-	// entirely — they have no 5h/7d usage quotas.
-	var cred creds.Credentials
-	var plan string
-	var isProvider bool
-	if cfg.usageFile != "" && cfg.statusFile != "" {
-		plan = "Debug"
-	} else {
-		plan = creds.Provider()
-		isProvider = plan != ""
-		if !isProvider {
-			// No API provider detected — resolve OAuth credentials for subscription plan.
-			cred, err = creds.Read(ctx, os.Getenv("CLAUDE_CONFIG_DIR"), keychainServiceName())
-			if err != nil {
-				log.Printf("credentials: %v", err)
-				plan = creds.ProviderAPI
-			} else {
-				plan = creds.PlanName(cred.ClaudeAiOauth.SubscriptionType)
-				if plan == "" {
-					log.Printf("unknown plan: subscription_type=%q", cred.ClaudeAiOauth.SubscriptionType)
-					plan = "Unknown plan"
-				}
-			}
-		}
-	}
+	remote := fetchRemoteData(ctx, cfg, cred, sub, isProvider)
 
-	// Build identity segment.
-	identity := render.Identity(data.Model.DisplayName, plan)
+	// Identity.
+	identity := render.Identity(data.Model.DisplayName, sub)
 
 	// Context bar.
 	contextPct := 0
 	if data.ContextWindow.UsedPercentage != nil {
 		contextPct = int(math.Round(*data.ContextWindow.UsedPercentage))
 	}
-	// Warn when context is near auto-compaction threshold.
 	compactPct := 85
 	if v, err := strconv.Atoi(os.Getenv("CLAUDE_AUTOCOMPACT_PCT_OVERRIDE")); err == nil && v > 0 && v <= 100 {
 		compactPct = v
@@ -200,56 +167,15 @@ func run(cfg config) error {
 		contextBar += " 🥵"
 	}
 
-	// Fetch usage data, service status, and update check concurrently.
-	var usageResp *usage.Response
-	var statusResp *status.Response
-	var updateResp *update.Response
-	var wg sync.WaitGroup
-
-	// Providers have no 5h/7d quotas — skip credential use and usage API.
-	if !isProvider {
-		if cfg.usageFile != "" {
-			resp, err := usage.ReadResponse(cfg.usageFile)
-			if err != nil {
-				log.Printf("usage: read file: %v", err)
-			}
-			usageResp = resp
-		} else {
-			fetchUsage(ctx, cred, plan, &wg, &usageResp)
-		}
-	}
-	if !creds.IsThirdPartyProvider(plan) {
-		if cfg.statusFile != "" {
-			resp, err := status.ReadResponse(cfg.statusFile)
-			if err != nil {
-				log.Printf("status: read file: %v", err)
-			}
-			statusResp = resp
-		} else {
-			fetchStatus(ctx, &wg, &statusResp)
-		}
-	}
-	if cfg.updateFile != "" {
-		resp, err := update.ReadResponse(cfg.updateFile)
-		if err != nil {
-			log.Printf("update: read file: %v", err)
-		}
-		updateResp = resp
-	} else {
-		fetchUpdate(ctx, &wg, &updateResp)
-	}
-
-	wg.Wait()
-
 	// Usage bars.
 	var usage5h, usage7d, usageExtra string
-	if usageResp != nil {
+	if remote.usage != nil {
 		now := time.Now()
 		// 5-hour bar (null on enterprise).
-		if usageResp.FiveHour != nil {
-			pct5 := int(math.Round(usageResp.FiveHour.Utilization))
+		if remote.usage.FiveHour != nil {
+			pct5 := int(math.Round(remote.usage.FiveHour.Utilization))
 			usage5h = render.Bar(pct5, render.QuotaColor)
-			if reset := render.ResetTime(usageResp.FiveHour.ResetsAt, now); reset != "" {
+			if reset := render.ResetTime(remote.usage.FiveHour.ResetsAt, now); reset != "" {
 				usage5h += " (" + reset + ")"
 			}
 			if policy.IsPeakHours(now, cred.ClaudeAiOauth.SubscriptionType) {
@@ -258,48 +184,50 @@ func run(cfg config) error {
 		}
 
 		// 7-day bar, plus per-model sub-bars (null on enterprise).
-		if usageResp.SevenDay != nil {
-			pct7 := int(math.Round(usageResp.SevenDay.Utilization))
+		if remote.usage.SevenDay != nil {
+			pct7 := int(math.Round(remote.usage.SevenDay.Utilization))
 			usage7d = render.Bar(pct7, render.QuotaColor)
-			if reset := render.ResetTime(usageResp.SevenDay.ResetsAt, now); reset != "" {
+			if reset := render.ResetTime(remote.usage.SevenDay.ResetsAt, now); reset != "" {
 				usage7d += " (" + reset + ")"
 			}
 			subSep := render.Dim + " · " + render.Reset
-			for _, sub := range []struct {
+			for _, model := range []struct {
 				q     *usage.QuotaLimit
 				label string
 			}{
-				{usageResp.SevenDaySonnet, "sonnet"},
-				{usageResp.SevenDayOpus, "opus"},
-				{usageResp.SevenDayCowork, "cowork"},
-				{usageResp.SevenDayOAuthApp, "oauth"},
+				{remote.usage.SevenDaySonnet, "sonnet"},
+				{remote.usage.SevenDayOpus, "opus"},
+				{remote.usage.SevenDayCowork, "cowork"},
+				{remote.usage.SevenDayOAuthApp, "oauth"},
 			} {
-				if sub.q != nil {
-					pct := int(math.Round(sub.q.Utilization))
-					usage7d += subSep + render.QuotaSubBar(pct, sub.label, render.ResetTime(sub.q.ResetsAt, now))
+				if model.q != nil {
+					pct := int(math.Round(model.q.Utilization))
+					usage7d += subSep + render.QuotaSubBar(
+						pct, model.label, render.ResetTime(model.q.ResetsAt, now),
+					)
 				}
 			}
 		}
 
 		// Extra usage.
-		if e := usageResp.ExtraUsage; e != nil && e.IsEnabled && e.MonthlyLimit != nil && e.UsedCredits != nil {
+		if e := remote.usage.ExtraUsage; e != nil && e.IsEnabled && e.MonthlyLimit != nil && e.UsedCredits != nil {
 			usageExtra = render.ExtraUsage(int(*e.UsedCredits)/100, int(*e.MonthlyLimit)/100)
 		}
 	}
 
 	// Service status.
 	var statusStr string
-	if statusResp != nil {
-		statusStr = render.StatusIndicator(statusResp.Status.Indicator)
+	if remote.status != nil {
+		statusStr = render.StatusIndicator(remote.status.Status.Indicator)
 	}
 
 	// Update indicator.
 	var updateStr string
-	if updateResp != nil {
-		updateStr = render.UpdateIndicator(updateResp.TagName)
+	if remote.update != nil {
+		updateStr = render.UpdateIndicator(remote.update.TagName)
 	}
 
-	// Render output.
+	// Working directory and git branch.
 	var cwdStr, branchStr string
 	if cfg.showCwd {
 		if name := cwdName(data.Cwd, cfg.cwdMaxLen); name != "" {
@@ -312,6 +240,7 @@ func run(cfg config) error {
 		}
 	}
 
+	// Combine identity with optional segments.
 	sep := render.Dim + " │ " + render.Reset
 	identityFull := identity
 	if cwdStr != "" {
@@ -322,7 +251,6 @@ func run(cfg config) error {
 	}
 
 	output := render.Output(identityFull, contextBar, usage5h, usage7d, usageExtra, statusStr, updateStr)
-
 	// Leading reset clears stale ANSI state from previous renders.
 	// Non-breaking spaces prevent the terminal from collapsing whitespace.
 	output = render.Reset + strings.ReplaceAll(output, " ", "\u00A0")
@@ -330,11 +258,108 @@ func run(cfg config) error {
 	return err
 }
 
+// readStdin reads and parses the stdin JSON payload.
+func readStdin(cfg config) (stdin.Data, error) {
+	input, err := io.ReadAll(os.Stdin)
+	if err != nil {
+		return stdin.Data{}, fmt.Errorf("read stdin: %w", err)
+	}
+	if cfg.debug {
+		_ = os.WriteFile(stdinFilePath(), input, 0o600)
+	}
+	data, err := stdin.Parse(input)
+	if err != nil {
+		return stdin.Data{}, fmt.Errorf("parse stdin: %w", err)
+	}
+	return data, nil
+}
+
+// resolveCredentials determines the subscription type and credentials from
+// environment variables and local credential stores. API providers (Bedrock,
+// Vertex, Foundry, API key) skip credential resolution entirely.
+func resolveCredentials(ctx context.Context, cfg config) (creds.Credentials, string, bool) {
+	if cfg.usageFile != "" && cfg.statusFile != "" {
+		return creds.Credentials{}, "Debug", false
+	}
+	sub := creds.Provider()
+	if sub != "" {
+		return creds.Credentials{}, sub, true
+	}
+	cred, err := creds.Read(ctx, os.Getenv("CLAUDE_CONFIG_DIR"), keychainServiceName())
+	if err != nil {
+		log.Printf("credentials: %v", err)
+		return creds.Credentials{}, creds.ProviderAPI, false
+	}
+	sub = creds.SubscriptionType(cred.ClaudeAiOauth.SubscriptionType)
+	if sub == "" {
+		log.Printf("unknown subscription type: subscription_type=%q", cred.ClaudeAiOauth.SubscriptionType)
+		sub = "Unknown subscription type"
+	}
+	return cred, sub, false
+}
+
+// remoteData holds responses from concurrent API calls.
+type remoteData struct {
+	usage  *usage.Response
+	status *status.Response
+	update *update.Response
+}
+
+// fetchRemoteData fetches usage, status, and update data concurrently.
+func fetchRemoteData(
+	ctx context.Context,
+	cfg config,
+	cred creds.Credentials,
+	sub string,
+	isProvider bool,
+) remoteData {
+	var rd remoteData
+	var wg sync.WaitGroup
+
+	// Providers have no 5h/7d quotas — skip usage API.
+	if !isProvider {
+		if cfg.usageFile != "" {
+			resp, err := usage.ReadResponse(cfg.usageFile)
+			if err != nil {
+				log.Printf("usage: read file: %v", err)
+			}
+			rd.usage = resp
+		} else {
+			fetchUsage(ctx, cred, sub, &wg, &rd.usage)
+		}
+	}
+
+	if !creds.IsThirdPartyProvider(sub) {
+		if cfg.statusFile != "" {
+			resp, err := status.ReadResponse(cfg.statusFile)
+			if err != nil {
+				log.Printf("status: read file: %v", err)
+			}
+			rd.status = resp
+		} else {
+			fetchStatus(ctx, &wg, &rd.status)
+		}
+	}
+
+	if cfg.updateFile != "" {
+		resp, err := update.ReadResponse(cfg.updateFile)
+		if err != nil {
+			log.Printf("update: read file: %v", err)
+		}
+		rd.update = resp
+	} else {
+		fetchUpdate(ctx, &wg, &rd.update)
+	}
+
+	wg.Wait()
+	return rd
+}
+
 // fetchUsage fetches usage data from the API in a goroutine.
 func fetchUsage(
 	ctx context.Context,
 	cred creds.Credentials,
-	plan string,
+	sub string,
 	wg *sync.WaitGroup,
 	out **usage.Response,
 ) {
@@ -344,7 +369,7 @@ func fetchUsage(
 		switch {
 		case token == "":
 			log.Printf("usage: no access token found")
-		case plan == "":
+		case sub == "":
 			log.Printf(
 				"usage: unknown subscription type %q, expected pro/max/team/enterprise",
 				subType,

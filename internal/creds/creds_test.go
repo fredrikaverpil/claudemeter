@@ -270,7 +270,7 @@ func TestPlanName(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			got := PlanName(tt.subType)
+			got := SubscriptionType(tt.subType)
 			if got != tt.want {
 				t.Errorf("PlanName(%q) = %q, want %q", tt.subType, got, tt.want)
 			}
