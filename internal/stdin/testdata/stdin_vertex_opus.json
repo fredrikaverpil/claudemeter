@@ -1,0 +1,39 @@
+{
+  "context_window": {
+    "context_window_size": 200000,
+    "current_usage": {
+      "cache_creation_input_tokens": 183,
+      "cache_read_input_tokens": 39709,
+      "input_tokens": 8,
+      "output_tokens": 112
+    },
+    "remaining_percentage": 80,
+    "total_input_tokens": 12915,
+    "total_output_tokens": 42779,
+    "used_percentage": 20
+  },
+  "cost": {
+    "total_api_duration_ms": 0,
+    "total_cost_usd": 0,
+    "total_duration_ms": 0,
+    "total_lines_added": 0,
+    "total_lines_removed": 0
+  },
+  "cwd": "/sanitized/project",
+  "exceeds_200k_tokens": false,
+  "model": {
+    "display_name": "Opus 4.5",
+    "id": "claude-opus-4-5@20251101"
+  },
+  "output_style": {
+    "name": "default"
+  },
+  "session_id": "sanitized-session-id",
+  "transcript_path": "/sanitized/transcript.jsonl",
+  "version": "2.1.87",
+  "workspace": {
+    "added_dirs": [],
+    "current_dir": "/sanitized/project",
+    "project_dir": "/sanitized/project"
+  }
+}

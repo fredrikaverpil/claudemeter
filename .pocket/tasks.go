@@ -157,10 +157,16 @@ var Capture = &pk.Task{
 			return fmt.Errorf("parse stdin JSON: %w", err)
 		}
 
-		// Resolve plan from this profile's credentials.
-		plan, err := resolvePlanName(ctx, configDir)
-		if err != nil {
-			return fmt.Errorf("resolve plan: %w", err)
+		// Determine the name prefix: provider (if detected) or plan.
+		var namePrefix string
+		if provider := detectProvider(); provider != "" {
+			namePrefix = provider
+		} else {
+			plan, err := resolvePlanName(ctx, configDir)
+			if err != nil {
+				return fmt.Errorf("resolve plan: %w", err)
+			}
+			namePrefix = plan
 		}
 
 		// Sanitize and pretty-print.
@@ -175,7 +181,7 @@ var Capture = &pk.Task{
 		}
 
 		model := modelShortName(payload.Model.ID)
-		filename := fmt.Sprintf("stdin_%s_%s.json", plan, model)
+		filename := fmt.Sprintf("stdin_%s_%s.json", namePrefix, model)
 		stdinTestdata := filepath.Join(dir, "internal", "stdin", "testdata")
 		outPath := filepath.Join(stdinTestdata, filename)
 		if err := os.MkdirAll(stdinTestdata, 0o755); err != nil {
@@ -205,7 +211,7 @@ var Capture = &pk.Task{
 		if err != nil {
 			return fmt.Errorf("format credentials JSON: %w", err)
 		}
-		credsFile := fmt.Sprintf("creds_%s.json", plan)
+		credsFile := fmt.Sprintf("creds_%s.json", namePrefix)
 		credsTestdata := filepath.Join(dir, "internal", "creds", "testdata")
 		if err := os.MkdirAll(credsTestdata, 0o755); err != nil {
 			return fmt.Errorf("create creds testdata dir: %w", err)
@@ -232,7 +238,7 @@ var Capture = &pk.Task{
 				if err := os.MkdirAll(usageTestdata, 0o755); err != nil {
 					return fmt.Errorf("create usage testdata dir: %w", err)
 				}
-				usageFile := fmt.Sprintf("usage_%s.json", plan)
+				usageFile := fmt.Sprintf("usage_%s.json", namePrefix)
 				usagePath := filepath.Join(usageTestdata, usageFile)
 				if err := os.WriteFile(usagePath, append(formattedUsage, '\n'), 0o644); err != nil {
 					return fmt.Errorf("write usage testdata: %w", err)
@@ -415,6 +421,24 @@ func planName(subType string) string {
 		return "team"
 	case strings.Contains(lower, "enterprise"):
 		return "enterprise"
+	default:
+		return ""
+	}
+}
+
+// detectProvider returns the API provider name based on environment variables.
+// Returns empty string if no API provider is detected (subscription mode).
+// Mirrors internal/creds.Provider().
+func detectProvider() string {
+	switch {
+	case os.Getenv("CLAUDE_CODE_USE_BEDROCK") == "1":
+		return "bedrock"
+	case os.Getenv("CLAUDE_CODE_USE_VERTEX") == "1":
+		return "vertex"
+	case os.Getenv("CLAUDE_CODE_USE_FOUNDRY") == "1":
+		return "foundry"
+	case os.Getenv("ANTHROPIC_API_KEY") != "" || os.Getenv("ANTHROPIC_AUTH_TOKEN") != "":
+		return "api"
 	default:
 		return ""
 	}
