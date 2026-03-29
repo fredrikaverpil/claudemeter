@@ -211,14 +211,14 @@ func run(cfg config) error {
 
 	// Providers have no 5h/7d quotas — skip credential use and usage API.
 	if !isProvider {
-		wg.Go(func() {
-			if cfg.usageFile != "" {
-				resp, err := usage.ReadResponse(cfg.usageFile)
-				if err != nil {
-					log.Printf("usage: read file: %v", err)
-				}
-				usageResp = resp
-			} else {
+		if cfg.usageFile != "" {
+			resp, err := usage.ReadResponse(cfg.usageFile)
+			if err != nil {
+				log.Printf("usage: read file: %v", err)
+			}
+			usageResp = resp
+		} else {
+			wg.Go(func() {
 				switch {
 				case token == "":
 					log.Printf("usage: no access token found")
@@ -235,43 +235,43 @@ func run(cfg config) error {
 					}
 					usageResp = resp
 				}
-			}
-		})
+			})
+		}
 	}
 
 	if !creds.IsThirdPartyProvider(plan) {
-		wg.Go(func() {
-			if cfg.statusFile != "" {
-				resp, err := status.ReadResponse(cfg.statusFile)
-				if err != nil {
-					log.Printf("status: read file: %v", err)
-				}
-				statusResp = resp
-			} else {
+		if cfg.statusFile != "" {
+			resp, err := status.ReadResponse(cfg.statusFile)
+			if err != nil {
+				log.Printf("status: read file: %v", err)
+			}
+			statusResp = resp
+		} else {
+			wg.Go(func() {
 				resp, err := status.Fetch(ctx, statusCacheFilePath())
 				if err != nil {
 					log.Printf("status: %v", err)
 				}
 				statusResp = resp
-			}
-		})
+			})
+		}
 	}
 
-	wg.Go(func() {
-		if cfg.updateFile != "" {
-			resp, err := update.ReadResponse(cfg.updateFile)
-			if err != nil {
-				log.Printf("update: read file: %v", err)
-			}
-			updateResp = resp
-		} else {
+	if cfg.updateFile != "" {
+		resp, err := update.ReadResponse(cfg.updateFile)
+		if err != nil {
+			log.Printf("update: read file: %v", err)
+		}
+		updateResp = resp
+	} else {
+		wg.Go(func() {
 			resp, err := update.Fetch(ctx, currentVersion(), updateCacheFilePath())
 			if err != nil {
 				log.Printf("update: %v", err)
 			}
 			updateResp = resp
-		}
-	})
+		})
+	}
 
 	wg.Wait()
 
