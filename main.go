@@ -239,25 +239,23 @@ func run(cfg config) error {
 		})
 	}
 
-	wg.Go(func() {
-		// Skip status.claude.com for providers with their own infrastructure.
-		if creds.IsThirdPartyProvider(plan) {
-			return
-		}
-		if cfg.statusFile != "" {
-			resp, err := status.ReadResponse(cfg.statusFile)
-			if err != nil {
-				log.Printf("status: read file: %v", err)
+	if !creds.IsThirdPartyProvider(plan) {
+		wg.Go(func() {
+			if cfg.statusFile != "" {
+				resp, err := status.ReadResponse(cfg.statusFile)
+				if err != nil {
+					log.Printf("status: read file: %v", err)
+				}
+				statusResp = resp
+			} else {
+				resp, err := status.Fetch(ctx, statusCacheFilePath())
+				if err != nil {
+					log.Printf("status: %v", err)
+				}
+				statusResp = resp
 			}
-			statusResp = resp
-		} else {
-			resp, err := status.Fetch(ctx, statusCacheFilePath())
-			if err != nil {
-				log.Printf("status: %v", err)
-			}
-			statusResp = resp
-		}
-	})
+		})
+	}
 
 	wg.Go(func() {
 		if cfg.updateFile != "" {
