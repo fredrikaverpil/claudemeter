@@ -235,7 +235,7 @@ func TestIsThirdPartyProvider(t *testing.T) {
 		{"Foundry", true},
 		{"API", false},
 		{"", false},
-		{"Pro", false},
+		{SubPro, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.provider, func(t *testing.T) {
@@ -257,14 +257,14 @@ func TestPlanName(t *testing.T) {
 		subType string
 		want    string
 	}{
-		{name: "free", subType: "claude_free_plan", want: "Free"},
-		{name: "pro", subType: "claude_pro_monthly", want: "Pro"},
-		{name: "max", subType: "claude_max_monthly", want: "Max"},
-		{name: "team", subType: "team_monthly", want: "Team"},
-		{name: "enterprise", subType: "enterprise_annual", want: "Enterprise"},
+		{name: "free", subType: "claude_free_plan", want: SubFree},
+		{name: "pro", subType: "claude_pro_monthly", want: SubPro},
+		{name: "max", subType: "claude_max_monthly", want: SubMax},
+		{name: "team", subType: "team_monthly", want: SubTeam},
+		{name: "enterprise", subType: "enterprise_annual", want: SubEnterprise},
 		{name: "empty", subType: "", want: ""},
 		{name: "unknown", subType: "unknown", want: ""},
-		{name: "case_insensitive", subType: "CLAUDE_PRO_MONTHLY", want: "Pro"},
+		{name: "case_insensitive", subType: "CLAUDE_PRO_MONTHLY", want: SubPro},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
