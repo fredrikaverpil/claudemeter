@@ -199,15 +199,16 @@ func fetchRemoteData(
 	// Providers have no 5h/7d quotas — skip usage API.
 	if !isProvider {
 		token := cred.ClaudeAiOauth.AccessToken
-		if cfg.usageFile != "" {
+		switch {
+		case cfg.usageFile != "":
 			resp, err := usage.ReadResponse(cfg.usageFile)
 			if err != nil {
 				log.Printf("usage: read file: %v", err)
 			}
 			rd.usage = resp
-		} else if token == "" {
+		case token == "":
 			log.Printf("usage: no access token found")
-		} else {
+		default:
 			usage.FetchAsync(ctx, token, paths.MustCacheFile(configDir, "usage.json"), &wg, &rd.usage)
 		}
 	}
