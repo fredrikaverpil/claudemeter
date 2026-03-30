@@ -11,6 +11,7 @@ import (
 	"sync"
 
 	"github.com/fredrikaverpil/claudeline/internal/creds"
+	"github.com/fredrikaverpil/claudeline/internal/git"
 	"github.com/fredrikaverpil/claudeline/internal/paths"
 	"github.com/fredrikaverpil/claudeline/internal/render"
 	"github.com/fredrikaverpil/claudeline/internal/status"
@@ -153,6 +154,7 @@ func run(cfg config) error {
 		Cwd:                data.Cwd,
 		CwdMaxLen:          cfg.cwdMaxLen,
 		ShowBranch:         cfg.showGitBranch,
+		Branch:             git.Branch(),
 		BranchMaxLen:       cfg.gitBranchMaxLen,
 	})
 
@@ -196,22 +198,17 @@ func fetchRemoteData(
 
 	// Providers have no 5h/7d quotas — skip usage API.
 	if !isProvider {
+		token := cred.ClaudeAiOauth.AccessToken
 		if cfg.usageFile != "" {
 			resp, err := usage.ReadResponse(cfg.usageFile)
 			if err != nil {
 				log.Printf("usage: read file: %v", err)
 			}
 			rd.usage = resp
+		} else if token == "" {
+			log.Printf("usage: no access token found")
 		} else {
-			usage.FetchAsync(
-				ctx,
-				cred.ClaudeAiOauth.AccessToken,
-				cred.ClaudeAiOauth.SubscriptionType,
-				sub,
-				paths.MustCacheFile(configDir, "usage.json"),
-				&wg,
-				&rd.usage,
-			)
+			usage.FetchAsync(ctx, token, paths.MustCacheFile(configDir, "usage.json"), &wg, &rd.usage)
 		}
 	}
 

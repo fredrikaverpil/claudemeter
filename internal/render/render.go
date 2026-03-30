@@ -3,7 +3,6 @@ package render
 import (
 	"fmt"
 	"math"
-	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -46,6 +45,7 @@ type Params struct {
 	Cwd                string // raw working directory path
 	CwdMaxLen          int
 	ShowBranch         bool
+	Branch             string // current git branch name
 	BranchMaxLen       int
 }
 
@@ -141,7 +141,7 @@ func Build(p Params) string {
 		}
 	}
 	if p.ShowBranch {
-		if name := compactName(getBranch(), p.BranchMaxLen); name != "" {
+		if name := compactName(p.Branch, p.BranchMaxLen); name != "" {
 			identityFull += sep + Magenta + name + Reset
 		}
 	}
@@ -297,19 +297,6 @@ func QuotaSubBar(pct int, label, resetTime string) string {
 		s += " (" + resetTime + ")"
 	}
 	return s
-}
-
-// getBranch returns the current git branch name, or "" if not in a git repo.
-func getBranch() string {
-	data, err := os.ReadFile(".git/HEAD")
-	if err != nil {
-		return ""
-	}
-	s := strings.TrimSpace(string(data))
-	if after, ok := strings.CutPrefix(s, "ref: refs/heads/"); ok {
-		return after
-	}
-	return "" // detached HEAD or bare repo
 }
 
 // cwdName extracts the last path segment from cwd as the folder name.

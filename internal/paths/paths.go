@@ -31,7 +31,6 @@ func ConfigDirSuffix(configDir string) string {
 }
 
 // CacheDir returns the directory for claudeline cache and log files.
-// Uses /tmp/claudeline on Unix and os.TempDir()/claudeline on Windows.
 func CacheDir() string {
 	base := "/tmp"
 	if runtime.GOOS == "windows" {

@@ -91,31 +91,15 @@ func Fetch(ctx context.Context, token, cachePath string) (*Response, error) {
 	return usage, nil
 }
 
-// FetchAsync fetches usage data in a goroutine. The token and subType are
-// validated before spawning the goroutine. Results are written to *out.
-func FetchAsync(
-	ctx context.Context,
-	token, subType, sub, cachePath string,
-	wg *sync.WaitGroup,
-	out **Response,
-) {
+// FetchAsync fetches usage data in a goroutine. Results are written to *out.
+func FetchAsync(ctx context.Context, token, cachePath string, wg *sync.WaitGroup, out **Response) {
 	wg.Go(func() {
-		switch {
-		case token == "":
-			log.Printf("usage: no access token found")
-		case sub == "":
-			log.Printf(
-				"usage: unknown subscription type %q, expected pro/max/team/enterprise",
-				subType,
-			)
-		default:
-			resp, err := Fetch(ctx, token, cachePath)
-			if err != nil && !errors.Is(err, ErrCachedRateLimited) &&
-				!errors.Is(err, ErrCachedFailure) {
-				log.Printf("usage: %v", err)
-			}
-			*out = resp
+		resp, err := Fetch(ctx, token, cachePath)
+		if err != nil && !errors.Is(err, ErrCachedRateLimited) &&
+			!errors.Is(err, ErrCachedFailure) {
+			log.Printf("usage: %v", err)
 		}
+		*out = resp
 	})
 }
 
