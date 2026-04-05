@@ -52,6 +52,7 @@ type Params struct {
 	ShowBranch       bool
 	Branch           string // current git branch name
 	BranchMaxLen     int
+	CostUSD          float64
 }
 
 // Build assembles the complete statusline string from all collected data.
@@ -180,7 +181,12 @@ func Build(p Params) string {
 		}
 	}
 
-	out := Output(identityFull, contextBar, usage5h, usage7d, usageExtra, statusStr, updateStr)
+	var costStr string
+	if p.CostUSD > 0 {
+		costStr = Cost(p.CostUSD)
+	}
+
+	out := Output(identityFull, contextBar, usage5h, usage7d, costStr, usageExtra, statusStr, updateStr)
 	// Leading reset clears stale ANSI state from previous renders.
 	// Non-breaking spaces prevent the terminal from collapsing whitespace.
 	return Reset + strings.ReplaceAll(out, " ", "\u00A0")
@@ -246,7 +252,7 @@ func Identity(model, plan string) string {
 }
 
 // Output assembles all segments into a single-line status output.
-func Output(identity, contextBar, usage5h, usage7d, usageExtra, statusIndicator, updateIndicator string) string {
+func Output(identity, contextBar, usage5h, usage7d, cost, usageExtra, statusIndicator, updateIndicator string) string {
 	sep := Dim + " │ " + Reset
 
 	out := identity + sep + contextBar
@@ -255,6 +261,9 @@ func Output(identity, contextBar, usage5h, usage7d, usageExtra, statusIndicator,
 	}
 	if usage7d != "" {
 		out += sep + usage7d
+	}
+	if cost != "" {
+		out += sep + cost
 	}
 	if usageExtra != "" {
 		out += sep + usageExtra
@@ -324,6 +333,11 @@ func StatusIndicator(indicator string) string {
 	default:
 		return ""
 	}
+}
+
+// Cost formats a USD cost value for display (e.g. "$1.23").
+func Cost(usd float64) string {
+	return fmt.Sprintf("$%.2f", usd)
 }
 
 // ExtraUsage returns the "$used/$limit" string for pay-as-you-go overage.

@@ -14,7 +14,7 @@
   },
   "cost": {
     "total_api_duration_ms": 0,
-    "total_cost_usd": 0,
+    "total_cost_usd": 0.03763335,
     "total_duration_ms": 0,
     "total_lines_added": 0,
     "total_lines_removed": 0

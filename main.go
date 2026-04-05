@@ -157,6 +157,7 @@ func run(cfg config) error {
 		ShowBranch:         cfg.showGitBranch,
 		Branch:             git.Branch(),
 		BranchMaxLen:       cfg.gitBranchMaxLen,
+		CostUSD:            data.Cost.TotalCostUSD,
 	})
 
 	_, err = fmt.Fprintln(os.Stdout, output)
