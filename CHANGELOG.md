@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.20.0](https://github.com/fredrikaverpil/claudeline/compare/v0.19.0...v0.20.0) (2026-04-05)
+
+
+### Features
+
+* **render:** make update indicator a clickable link ([#89](https://github.com/fredrikaverpil/claudeline/issues/89)) ([c937c9a](https://github.com/fredrikaverpil/claudeline/commit/c937c9a158adc3cc9fa245e62b1772d28a752a4b))
+
 ## [0.19.0](https://github.com/fredrikaverpil/claudeline/compare/v0.18.0...v0.19.0) (2026-04-05)
 
 
