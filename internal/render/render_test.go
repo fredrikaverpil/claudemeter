@@ -7,6 +7,36 @@ import (
 	"time"
 )
 
+func TestBuild_NoPlan(t *testing.T) {
+	t.Parallel()
+
+	pct := 23.0
+
+	// With plan: output contains the plan string.
+	withPlan := Build(Params{
+		LoginType:      "Pro",
+		Model:          "Opus 4.6",
+		ContextUsedPct: &pct,
+	})
+	if !strings.Contains(withPlan, "Pro") {
+		t.Error("expected plan 'Pro' in output with Sub set")
+	}
+
+	// Without plan (simulates -no-plan): output has the model but no plan.
+	withoutPlan := Build(Params{
+		LoginType:      "",
+		Model:          "Opus 4.6",
+		ContextUsedPct: &pct,
+	})
+	if strings.Contains(withoutPlan, "Pro") {
+		t.Error("expected no plan in output with empty Sub")
+	}
+	// Build replaces spaces with non-breaking spaces (\u00A0).
+	if !strings.Contains(withoutPlan, strings.ReplaceAll("Opus 4.6", " ", "\u00A0")) {
+		t.Error("expected model 'Opus 4.6' in output with empty Sub")
+	}
+}
+
 func TestContextColorFunc(t *testing.T) {
 	t.Parallel()
 

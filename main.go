@@ -67,6 +67,7 @@ type config struct {
 	showCwd         bool
 	cwdMaxLen       int
 	showCost        bool
+	hidePlan        bool
 
 	// debug options
 	debug      bool
@@ -84,6 +85,7 @@ func runMain() int {
 	showCwd := flag.Bool("cwd", false, "show working directory name in the status line")
 	cwdMaxLen := flag.Int("cwd-max-len", 30, "max display length for working directory name")
 	showCost := flag.Bool("cost", false, "show estimated session cost in the status line (always on for API key users)")
+	hidePlan := flag.Bool("no-plan", false, "hide subscription plan from the status line")
 	usageFile := flag.String("usage-file", "", "read usage data from file instead of API")
 	statusFile := flag.String("status-file", "", "read status data from file instead of API")
 	updateFile := flag.String("update-file", "", "read update data from file instead of API")
@@ -120,6 +122,7 @@ func runMain() int {
 		showCwd:         *showCwd,
 		cwdMaxLen:       *cwdMaxLen,
 		showCost:        *showCost,
+		hidePlan:        *hidePlan,
 		usageFile:       *usageFile,
 		statusFile:      *statusFile,
 		updateFile:      *updateFile,
@@ -142,8 +145,13 @@ func run(cfg config) error {
 	cred, loginType, isProvider := creds.Resolve(ctx, debugMode, configDir)
 	remote := fetchRemoteData(ctx, cfg, cred, loginType, isProvider)
 
+	displayLoginType := loginType
+	if cfg.hidePlan {
+		displayLoginType = ""
+	}
+
 	output := render.Build(render.Params{
-		LoginType:          loginType,
+		LoginType:          displayLoginType,
 		Model:              data.Model.DisplayName,
 		ContextUsedPct:     data.ContextWindow.UsedPercentage,
 		CompactPctOverride: os.Getenv("CLAUDE_AUTOCOMPACT_PCT_OVERRIDE"),
