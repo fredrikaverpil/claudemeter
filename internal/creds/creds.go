@@ -22,7 +22,8 @@ const (
 	ProviderBedrock = "Bedrock"
 	ProviderVertex  = "Vertex"
 	ProviderFoundry = "Foundry"
-	ProviderAPI     = "API" // Anthropic's API
+	ProviderAPI     = "API"   // Anthropic's API
+	ProviderOAuth   = "OAuth" // Long-lived OAuth token
 )
 
 // Subscription display names returned by SubscriptionType().
@@ -33,7 +34,6 @@ const (
 	SubTeam       = "Team"
 	SubEnterprise = "Enterprise"
 	SubDebug      = "Debug" // Only used by claudeline while debugging
-	SubUnknown    = "Unknown subscription type"
 )
 
 // thirdPartyProviders are providers that use non-Anthropic infrastructure
@@ -93,7 +93,7 @@ func Read(ctx context.Context, configDir, keychainService string) (Credentials, 
 // Provider returns the API provider name based on environment variables.
 // Returns empty string if no API provider is detected (subscription mode).
 // Precedence follows Claude Code's authentication order:
-// Bedrock > Vertex > Foundry > API key/bearer token.
+// Bedrock > Vertex > Foundry > API key/bearer token > OAuth token.
 func Provider() string {
 	switch {
 	case os.Getenv("CLAUDE_CODE_USE_BEDROCK") == "1":
@@ -104,6 +104,8 @@ func Provider() string {
 		return ProviderFoundry
 	case os.Getenv("ANTHROPIC_API_KEY") != "" || os.Getenv("ANTHROPIC_AUTH_TOKEN") != "":
 		return ProviderAPI
+	case os.Getenv("CLAUDE_CODE_OAUTH_TOKEN") != "":
+		return ProviderOAuth
 	default:
 		return ""
 	}
@@ -134,7 +136,6 @@ func Resolve(ctx context.Context, debugMode bool, configDir string) (Credentials
 	loginType = SubscriptionType(cred.ClaudeAiOauth.SubscriptionType)
 	if loginType == "" {
 		log.Printf("unknown subscription type: subscription_type=%q", cred.ClaudeAiOauth.SubscriptionType)
-		loginType = SubUnknown
 	}
 	return cred, loginType, false
 }

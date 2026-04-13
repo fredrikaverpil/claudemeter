@@ -197,6 +197,19 @@ func TestProvider(t *testing.T) {
 			},
 			want: "API",
 		},
+		{
+			name: "oauth_token",
+			env:  map[string]string{"CLAUDE_CODE_OAUTH_TOKEN": "oauth-token"},
+			want: "OAuth",
+		},
+		{
+			name: "api_key_over_oauth_token",
+			env: map[string]string{
+				"ANTHROPIC_API_KEY":       "sk-ant-xxx",
+				"CLAUDE_CODE_OAUTH_TOKEN": "oauth-token",
+			},
+			want: "API",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -207,6 +220,7 @@ func TestProvider(t *testing.T) {
 				"CLAUDE_CODE_USE_FOUNDRY",
 				"ANTHROPIC_API_KEY",
 				"ANTHROPIC_AUTH_TOKEN",
+				"CLAUDE_CODE_OAUTH_TOKEN",
 			} {
 				t.Setenv(key, "")
 			}
@@ -234,6 +248,7 @@ func TestIsThirdPartyProvider(t *testing.T) {
 		{"Vertex", true},
 		{"Foundry", true},
 		{"API", false},
+		{"OAuth", false},
 		{"", false},
 		{SubPro, false},
 	}
