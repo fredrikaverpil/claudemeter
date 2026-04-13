@@ -289,7 +289,6 @@ func TestPlanName(t *testing.T) {
 		subType string
 		want    string
 	}{
-		{name: "free", subType: "claude_free_plan", want: SubFree},
 		{name: "pro", subType: "claude_pro_monthly", want: SubPro},
 		{name: "max", subType: "claude_max_monthly", want: SubMax},
 		{name: "team", subType: "team_monthly", want: SubTeam},
