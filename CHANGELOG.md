@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.22.1](https://github.com/fredrikaverpil/claudeline/compare/v0.22.0...v0.22.1) (2026-04-13)
+
+
+### Bug Fixes
+
+* drop remaining free plan references ([#103](https://github.com/fredrikaverpil/claudeline/issues/103)) ([a505b6f](https://github.com/fredrikaverpil/claudeline/commit/a505b6f3eec03332f8692e4685e98b99a4f959e0))
+* remove "free" plan (there is no such claude code plan) ([#100](https://github.com/fredrikaverpil/claudeline/issues/100)) ([02c0dd1](https://github.com/fredrikaverpil/claudeline/commit/02c0dd19a267a99ce9df89652e449894f8fc1dbe))
+
 ## [0.22.0](https://github.com/fredrikaverpil/claudeline/compare/v0.21.0...v0.22.0) (2026-04-13)
 
 
