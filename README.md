@@ -106,10 +106,10 @@ Key components:
 
 - **Credential resolution:** Detects API provider from environment variables
   following [Claude Code's authentication precedence](https://code.claude.com/docs/en/authentication#credential-management):
-  `CLAUDE_CODE_USE_BEDROCK`, `CLAUDE_CODE_USE_VERTEX`,
+  `CLAUDE_CODE_USE_MANTLE`, `CLAUDE_CODE_USE_BEDROCK`, `CLAUDE_CODE_USE_VERTEX`,
   `CLAUDE_CODE_USE_FOUNDRY`, `ANTHROPIC_API_KEY`/`ANTHROPIC_AUTH_TOKEN`,
-  `CLAUDE_CODE_OAUTH_TOKEN` — displaying "Bedrock", "Vertex", "Foundry", "API",
-  or "OAuth" instead of the plan name.
+  `CLAUDE_CODE_OAUTH_TOKEN` — displaying "Mantle", "Bedrock", "Vertex",
+  "Foundry", "API", or "OAuth" instead of the plan name.
   When no provider is detected, reads OAuth credentials from macOS Keychain
   (`security find-generic-password`), falling back to
   `~/.claude/.credentials.json`. The subscription type is mapped from the

@@ -143,6 +143,11 @@ func TestProvider(t *testing.T) {
 		want string
 	}{
 		{
+			name: "mantle",
+			env:  map[string]string{"CLAUDE_CODE_USE_MANTLE": "1"},
+			want: "Mantle",
+		},
+		{
 			name: "bedrock",
 			env:  map[string]string{"CLAUDE_CODE_USE_BEDROCK": "1"},
 			want: "Bedrock",
@@ -173,7 +178,17 @@ func TestProvider(t *testing.T) {
 			want: "",
 		},
 		{
-			name: "bedrock_takes_precedence",
+			name: "mantle_takes_precedence",
+			env: map[string]string{
+				"CLAUDE_CODE_USE_MANTLE":  "1",
+				"CLAUDE_CODE_USE_BEDROCK": "1",
+				"CLAUDE_CODE_USE_VERTEX":  "1",
+				"ANTHROPIC_API_KEY":       "sk-ant-xxx",
+			},
+			want: "Mantle",
+		},
+		{
+			name: "bedrock_over_vertex",
 			env: map[string]string{
 				"CLAUDE_CODE_USE_BEDROCK": "1",
 				"CLAUDE_CODE_USE_VERTEX":  "1",
@@ -215,6 +230,7 @@ func TestProvider(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			// Clear relevant env vars first.
 			for _, key := range []string{
+				"CLAUDE_CODE_USE_MANTLE",
 				"CLAUDE_CODE_USE_BEDROCK",
 				"CLAUDE_CODE_USE_VERTEX",
 				"CLAUDE_CODE_USE_FOUNDRY",
@@ -245,6 +261,7 @@ func TestIsThirdPartyProvider(t *testing.T) {
 		want     bool
 	}{
 		{"Bedrock", true},
+		{"Mantle", true},
 		{"Vertex", true},
 		{"Foundry", true},
 		{"API", false},
