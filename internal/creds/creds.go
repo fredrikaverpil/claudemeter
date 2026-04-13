@@ -20,6 +20,7 @@ const ioTimeout = 5 * time.Second
 // API provider names returned by Provider().
 const (
 	ProviderBedrock = "Bedrock"
+	ProviderMantle  = "Mantle" // Amazon Bedrock powered by Mantle
 	ProviderVertex  = "Vertex"
 	ProviderFoundry = "Foundry"
 	ProviderAPI     = "API"   // Anthropic's API
@@ -40,6 +41,7 @@ const (
 // (AWS, GCP, Azure). status.claude.com is not relevant for these.
 var thirdPartyProviders = map[string]bool{
 	ProviderBedrock: true,
+	ProviderMantle:  true,
 	ProviderVertex:  true,
 	ProviderFoundry: true,
 }
@@ -93,9 +95,11 @@ func Read(ctx context.Context, configDir, keychainService string) (Credentials, 
 // Provider returns the API provider name based on environment variables.
 // Returns empty string if no API provider is detected (subscription mode).
 // Precedence follows Claude Code's authentication order:
-// Bedrock > Vertex > Foundry > API key/bearer token > OAuth token.
+// Mantle > Bedrock > Vertex > Foundry > API key/bearer token > OAuth token.
 func Provider() string {
 	switch {
+	case os.Getenv("CLAUDE_CODE_USE_MANTLE") == "1":
+		return ProviderMantle
 	case os.Getenv("CLAUDE_CODE_USE_BEDROCK") == "1":
 		return ProviderBedrock
 	case os.Getenv("CLAUDE_CODE_USE_VERTEX") == "1":
