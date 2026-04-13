@@ -416,6 +416,8 @@ func resolvePlanName(ctx context.Context, configDir string) (string, error) {
 func planName(subType string) string {
 	lower := strings.ToLower(subType)
 	switch {
+	case strings.Contains(lower, "free"):
+		return "free"
 	case strings.Contains(lower, "pro"):
 		return "pro"
 	case strings.Contains(lower, "max"):

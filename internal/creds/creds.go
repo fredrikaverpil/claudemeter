@@ -29,6 +29,7 @@ const (
 
 // Subscription display names returned by SubscriptionType().
 const (
+	SubFree       = "Free"
 	SubPro        = "Pro"
 	SubMax        = "Max"
 	SubTeam       = "Team"
@@ -153,6 +154,8 @@ func KeychainServiceName(configDir string) string {
 func SubscriptionType(subType string) string {
 	lower := strings.ToLower(subType)
 	switch {
+	case strings.Contains(lower, "free"):
+		return SubFree
 	case strings.Contains(lower, "pro"):
 		return SubPro
 	case strings.Contains(lower, "max"):
