@@ -105,13 +105,18 @@ stdout
 Key components:
 
 - **Credential resolution:** Detects API provider from environment variables
-  first (`CLAUDE_CODE_USE_BEDROCK`, `CLAUDE_CODE_USE_VERTEX`,
-  `CLAUDE_CODE_USE_FOUNDRY`, `ANTHROPIC_API_KEY`/`ANTHROPIC_AUTH_TOKEN`),
-  displaying "Bedrock", "Vertex", "Foundry", or "API" instead of the plan name.
+  following [Claude Code's authentication precedence](https://code.claude.com/docs/en/authentication#credential-management):
+  `CLAUDE_CODE_USE_BEDROCK`, `CLAUDE_CODE_USE_VERTEX`,
+  `CLAUDE_CODE_USE_FOUNDRY`, `ANTHROPIC_API_KEY`/`ANTHROPIC_AUTH_TOKEN`,
+  `CLAUDE_CODE_OAUTH_TOKEN` — displaying "Bedrock", "Vertex", "Foundry", "API",
+  or "OAuth" instead of the plan name.
   When no provider is detected, reads OAuth credentials from macOS Keychain
   (`security find-generic-password`), falling back to
-  `~/.claude/.credentials.json`. Works on any platform via the file fallback.
-  Failure is non-fatal (usage bars are omitted).
+  `~/.claude/.credentials.json`. The subscription type is mapped from the
+  credential's `subscriptionType` field (free, pro, max, team, enterprise).
+  Unrecognized subscription types are silently omitted from the status line
+  (use `-debug` to see the raw value). Works on any platform via the file
+  fallback. Failure is non-fatal (usage bars are omitted).
 - **Usage API:** `GET https://api.anthropic.com/api/oauth/usage` with OAuth
   bearer token. 5-second HTTP timeout.
 - **File-based cache:** `/tmp/claudeline/usage.json` with 60s TTL on success,
@@ -232,6 +237,7 @@ and re-run `./pok capture` to refresh the testdata.
   project
 - [Create Claude plugins](https://code.claude.com/docs/en/plugins)
 - [Customize your status line](https://code.claude.com/docs/en/statusline)
+- [Authentication and credential management](https://code.claude.com/docs/en/authentication#credential-management)
 - [Costs and context window](https://code.claude.com/docs/en/costs)
 
 ### Usage API
