@@ -22,14 +22,14 @@ bars. Written in Go with no external dependencies (stdlib only).
 
 ## Indicator legend
 
-| Indicator            | Meaning                                                                                                      |
-| -------------------- | ------------------------------------------------------------------------------------------------------------ |
-| `⚡️`                 | Peak hours: 5-hour limit burns [faster than normal](https://xcancel.com/trq212/status/2037254607001559305#m) |
-| `⚠️`                 | Approaching auto-compaction threshold                                                                        |
-| `🥵`                 | Extended context (>200k tokens) — model quality may degrade                                                  |
-| `🔥▂` `🔥▄▂` `🔥▆▄▂` | Anthropic service disruption (minor / major / critical)                                                      |
-| `🥊`                 | Prompt cache miss — this turn was not served from cache (costs more)                                         |
-| `↑`                  | New `claudeline` update available                                                                            |
+| Indicator            | Meaning                                                                                                                                                               |
+| -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `⚡️`                 | Peak hours: 5-hour limit burns [faster than normal](https://xcancel.com/trq212/status/2037254607001559305#m)                                                          |
+| `⚠️`                 | Approaching auto-compaction threshold                                                                                                                                 |
+| `🥵`                 | Extended context (>200k tokens) — model quality may degrade                                                                                                           |
+| `🔥▂` `🔥▄▂` `🔥▆▄▂` | Anthropic service disruption (minor / major / critical)                                                                                                               |
+| `🥊`                 | [Prompt cache](https://platform.claude.com/docs/en/build-with-claude/prompt-caching#how-prompt-caching-works) miss — this turn was not served from cache (costs more) |
+| `↑`                  | New `claudeline` update available                                                                                                                                     |
 
 ## Installation
 
