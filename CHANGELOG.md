@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.22.0](https://github.com/fredrikaverpil/claudeline/compare/v0.21.0...v0.22.0) (2026-04-13)
+
+
+### Features
+
+* **creds:** detect Mantle provider ([#99](https://github.com/fredrikaverpil/claudeline/issues/99)) ([f745a1d](https://github.com/fredrikaverpil/claudeline/commit/f745a1d6e7794f1a85abb5827414c79e809b744a))
+* **creds:** detect OAuth token and omit unknown types ([#97](https://github.com/fredrikaverpil/claudeline/issues/97)) ([5cb79a7](https://github.com/fredrikaverpil/claudeline/commit/5cb79a75a40c018c53e4373e4f86ae6c5b4eb59c))
+
 ## [0.21.0](https://github.com/fredrikaverpil/claudeline/compare/v0.20.0...v0.21.0) (2026-04-13)
 
 
