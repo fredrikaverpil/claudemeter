@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.21.0](https://github.com/fredrikaverpil/claudeline/compare/v0.20.0...v0.21.0) (2026-04-13)
+
+
+### Features
+
+* **render:** add prompt cache miss indicator ([#95](https://github.com/fredrikaverpil/claudeline/issues/95)) ([035dfb3](https://github.com/fredrikaverpil/claudeline/commit/035dfb3111fdfdd5548dd5af0d4fd1acbd0c5c6b))
+
 ## [0.20.0](https://github.com/fredrikaverpil/claudeline/compare/v0.19.0...v0.20.0) (2026-04-05)
 
 
