@@ -631,6 +631,39 @@ func TestCompactName(t *testing.T) {
 	}
 }
 
+func TestBuild_CacheMiss(t *testing.T) {
+	t.Parallel()
+
+	pct := 25.0
+	base := Params{
+		LoginType:      "Pro",
+		Model:          "Opus",
+		ContextUsedPct: &pct,
+	}
+
+	t.Run("cache miss shows indicator", func(t *testing.T) {
+		t.Parallel()
+		p := base
+		p.CacheMiss = true
+		got := Build(p)
+		if !strings.Contains(got, "🥊") {
+			t.Errorf("Build() with CacheMiss=true should contain 🥊, got %q", got)
+		}
+	})
+
+	t.Run("cache hit hides indicator", func(t *testing.T) {
+		t.Parallel()
+		p := base
+		p.CacheMiss = false
+		got := Build(p)
+		// Replace NBSP back to space for comparison.
+		normalized := strings.ReplaceAll(got, "\u00A0", " ")
+		if strings.Contains(normalized, "🥊") {
+			t.Errorf("Build() with CacheMiss=false should not contain 🥊, got %q", got)
+		}
+	})
+}
+
 func TestCwdName(t *testing.T) {
 	t.Parallel()
 

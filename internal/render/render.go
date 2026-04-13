@@ -52,6 +52,7 @@ type Params struct {
 	ShowBranch       bool
 	Branch           string // current git branch name
 	BranchMaxLen     int
+	CacheMiss        bool
 	ShowCost         bool
 	CostUSD          float64
 }
@@ -77,6 +78,9 @@ func Build(p Params) string {
 	}
 	if p.Exceeds200kTokens {
 		contextBar += " 🥵"
+	}
+	if p.CacheMiss {
+		contextBar += " 🥊"
 	}
 
 	// Usage bars.

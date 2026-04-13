@@ -183,6 +183,10 @@ func TestParse(t *testing.T) {
 				}{DisplayName: "Opus"},
 				ContextWindow: struct {
 					UsedPercentage *float64 `json:"used_percentage"`
+					CurrentUsage   *struct {
+						CacheCreationInputTokens int `json:"cache_creation_input_tokens"`
+						CacheReadInputTokens     int `json:"cache_read_input_tokens"`
+					} `json:"current_usage"`
 				}{UsedPercentage: &pct},
 			},
 		},
@@ -234,6 +238,45 @@ func TestParse(t *testing.T) {
 					FiveHour: &RateLimit{UsedPercentage: new(59.0), ResetsAt: new(1774656000.0)},
 					SevenDay: &RateLimit{UsedPercentage: new(58.0), ResetsAt: new(1774771200.0)},
 				},
+			},
+		},
+		{
+			name: "current_usage with cache tokens",
+			input: `{"cwd":"/tmp","model":{"display_name":"Opus"},` +
+				`"context_window":{"used_percentage":42.5,` +
+				`"current_usage":{"cache_creation_input_tokens":422,` +
+				`"cache_read_input_tokens":123067}}}`,
+			want: Data{
+				Cwd: "/tmp",
+				Model: struct {
+					DisplayName string `json:"display_name"`
+				}{DisplayName: "Opus"},
+				ContextWindow: struct {
+					UsedPercentage *float64 `json:"used_percentage"`
+					CurrentUsage   *struct {
+						CacheCreationInputTokens int `json:"cache_creation_input_tokens"`
+						CacheReadInputTokens     int `json:"cache_read_input_tokens"`
+					} `json:"current_usage"`
+				}{
+					UsedPercentage: &pct,
+					CurrentUsage: &struct {
+						CacheCreationInputTokens int `json:"cache_creation_input_tokens"`
+						CacheReadInputTokens     int `json:"cache_read_input_tokens"`
+					}{
+						CacheCreationInputTokens: 422,
+						CacheReadInputTokens:     123067,
+					},
+				},
+			},
+		},
+		{
+			name:  "current_usage null",
+			input: `{"cwd":"/tmp","model":{"display_name":"Opus"},"context_window":{"current_usage":null}}`,
+			want: Data{
+				Cwd: "/tmp",
+				Model: struct {
+					DisplayName string `json:"display_name"`
+				}{DisplayName: "Opus"},
 			},
 		},
 		{
@@ -292,6 +335,27 @@ func TestParse(t *testing.T) {
 						*got.ContextWindow.UsedPercentage,
 						*tt.want.ContextWindow.UsedPercentage,
 					)
+				}
+			}
+			if tt.want.ContextWindow.CurrentUsage == nil {
+				if got.ContextWindow.CurrentUsage != nil {
+					t.Errorf("CurrentUsage = %+v, want nil", got.ContextWindow.CurrentUsage)
+				}
+			} else {
+				if got.ContextWindow.CurrentUsage == nil {
+					t.Fatal("CurrentUsage is nil, want non-nil")
+				}
+				gotCU := got.ContextWindow.CurrentUsage
+				wantCU := tt.want.ContextWindow.CurrentUsage
+				if gotCU.CacheCreationInputTokens != wantCU.CacheCreationInputTokens {
+					t.Errorf("CacheCreationInputTokens = %d, want %d",
+						gotCU.CacheCreationInputTokens,
+						wantCU.CacheCreationInputTokens)
+				}
+				if gotCU.CacheReadInputTokens != wantCU.CacheReadInputTokens {
+					t.Errorf("CacheReadInputTokens = %d, want %d",
+						gotCU.CacheReadInputTokens,
+						wantCU.CacheReadInputTokens)
 				}
 			}
 			if got.Exceeds200kTokens != tt.want.Exceeds200kTokens {

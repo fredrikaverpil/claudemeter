@@ -20,6 +20,10 @@ type Data struct {
 	} `json:"model"`
 	ContextWindow struct {
 		UsedPercentage *float64 `json:"used_percentage"`
+		CurrentUsage   *struct {
+			CacheCreationInputTokens int `json:"cache_creation_input_tokens"`
+			CacheReadInputTokens     int `json:"cache_read_input_tokens"`
+		} `json:"current_usage"`
 	} `json:"context_window"`
 	Exceeds200kTokens bool `json:"exceeds_200k_tokens"`
 	RateLimits        *struct {
