@@ -28,6 +28,7 @@ bars. Written in Go with no external dependencies (stdlib only).
 | `⚠️`                 | Approaching auto-compaction threshold                                                                        |
 | `🥵`                 | Extended context (>200k tokens) — model quality may degrade                                                  |
 | `🔥▂` `🔥▄▂` `🔥▆▄▂` | Anthropic service disruption (minor / major / critical)                                                      |
+| `🥊`                 | Prompt cache miss — this turn was not served from cache (costs more)                                         |
 | `↑`                  | New `claudeline` update available                                                                            |
 
 ## Installation
