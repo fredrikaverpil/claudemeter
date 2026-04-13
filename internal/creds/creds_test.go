@@ -199,12 +199,12 @@ func TestProvider(t *testing.T) {
 		},
 		{
 			name: "oauth_token",
-			env:  map[string]string{"CLAUDE_CODE_OAUTH_TOKEN": "oauth-token"},
+			env:  map[string]string{"CLAUDE_CODE_OAUTH_TOKEN": "oauth-token"}, //nolint:gosec // test data
 			want: "OAuth",
 		},
 		{
 			name: "api_key_over_oauth_token",
-			env: map[string]string{
+			env: map[string]string{ //nolint:gosec // test data
 				"ANTHROPIC_API_KEY":       "sk-ant-xxx",
 				"CLAUDE_CODE_OAUTH_TOKEN": "oauth-token",
 			},
