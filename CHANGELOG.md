@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.23.0](https://github.com/fredrikaverpil/claudeline/compare/v0.22.1...v0.23.0) (2026-04-15)
+
+
+### Features
+
+* **status:** link status indicator to Claude status page ([#104](https://github.com/fredrikaverpil/claudeline/issues/104)) ([bd73475](https://github.com/fredrikaverpil/claudeline/commit/bd73475e6fbfe36dcdedc21f80a5292c7a42550c))
+
 ## [0.22.1](https://github.com/fredrikaverpil/claudeline/compare/v0.22.0...v0.22.1) (2026-04-13)
 
 
