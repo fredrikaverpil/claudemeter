@@ -290,8 +290,7 @@ func UpdateIndicator(tag string) string {
 		return ""
 	}
 	url := "https://github.com/fredrikaverpil/claudeline/releases/tag/" + tag
-	// OSC 8 hyperlink: \033]8;;URL\a TEXT \033]8;;\a
-	return "\033]8;;" + url + "\a" + Green + "↑" + Reset + "\033]8;;\a"
+	return hyperlink(url, Green+"↑"+Reset)
 }
 
 // ResetTime formats a reset timestamp, showing just the time if it's
@@ -331,16 +330,23 @@ func ResetTimeUnix(ts *float64, now time.Time) string {
 // StatusIndicator returns a colored fire icon with severity bars for service disruptions.
 // Returns "" for "none", unknown indicators, or empty input.
 func StatusIndicator(indicator string) string {
+	const statusURL = "https://status.claude.com"
+
 	switch indicator {
 	case "minor":
-		return Orange + "🔥▂" + Reset
+		return hyperlink(statusURL, Orange+"🔥▂"+Reset)
 	case "major":
-		return Orange + "🔥▄▂" + Reset
+		return hyperlink(statusURL, Orange+"🔥▄▂"+Reset)
 	case "critical":
-		return Orange + "🔥▆▄▂" + Reset
+		return hyperlink(statusURL, Orange+"🔥▆▄▂"+Reset)
 	default:
 		return ""
 	}
+}
+
+// hyperlink wraps text in an OSC 8 terminal hyperlink.
+func hyperlink(url, text string) string {
+	return "\033]8;;" + url + "\a" + text + "\033]8;;\a"
 }
 
 // Cost formats a USD cost value for display (e.g. "$1.23").

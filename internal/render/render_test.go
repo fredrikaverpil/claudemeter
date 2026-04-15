@@ -267,9 +267,21 @@ func TestStatusIndicator(t *testing.T) {
 	}{
 		{name: "none", indicator: "none", want: ""},
 		{name: "empty", indicator: "", want: ""},
-		{name: "minor", indicator: "minor", want: Orange + "🔥▂" + Reset},
-		{name: "major", indicator: "major", want: Orange + "🔥▄▂" + Reset},
-		{name: "critical", indicator: "critical", want: Orange + "🔥▆▄▂" + Reset},
+		{
+			name:      "minor",
+			indicator: "minor",
+			want:      "\033]8;;https://status.claude.com\a" + Orange + "🔥▂" + Reset + "\033]8;;\a",
+		},
+		{
+			name:      "major",
+			indicator: "major",
+			want:      "\033]8;;https://status.claude.com\a" + Orange + "🔥▄▂" + Reset + "\033]8;;\a",
+		},
+		{
+			name:      "critical",
+			indicator: "critical",
+			want:      "\033]8;;https://status.claude.com\a" + Orange + "🔥▆▄▂" + Reset + "\033]8;;\a",
+		},
 		{name: "unknown", indicator: "maintenance", want: ""},
 	}
 
