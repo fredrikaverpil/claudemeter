@@ -141,9 +141,8 @@ Key components:
   approximately 95% of its effective context capacity, but claudeline warns
   earlier so you have time to react. If Claude Code's
   `CLAUDE_CODE_AUTO_COMPACT_WINDOW` is set, claudeline applies its warning zones
-  relative to that effective capacity. The legacy
-  `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE` percentage override is applied as a
-  percentage of that capacity, matching Claude Code's behavior.
+  relative to that effective capacity. `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE` is
+  applied as a percentage of that capacity, matching Claude Code's behavior.
 - **Extended context indicator:** A `🥵` appears on the context bar when
   `exceeds_200k_tokens` is true, signaling the session has entered extended
   context territory where model quality may degrade.
