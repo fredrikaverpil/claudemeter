@@ -197,21 +197,17 @@ func Build(p Params) string {
 }
 
 func compactPct(compactWindow string, contextWindowSize int, compactPctOverride string) int {
-	if pct := compactWindowPct(compactWindow, contextWindowSize); pct > 0 {
-		return pct
-	}
-
-	if pct := compactPctOverrideValue(compactPctOverride); pct > 0 {
-		return pct
-	}
-
-	return 85
+	pct := int(math.Round(
+		float64(compactWindowPct(compactWindow, contextWindowSize)) *
+			float64(compactPctOverrideValue(compactPctOverride)) / 100,
+	))
+	return max(1, pct)
 }
 
 func compactWindowPct(compactWindow string, contextWindowSize int) int {
 	windowTokens, err := strconv.Atoi(compactWindow)
 	if err != nil || windowTokens <= 0 || contextWindowSize <= 0 {
-		return 0
+		return 100
 	}
 
 	pct := int(math.Round(float64(windowTokens) / float64(contextWindowSize) * 100))
@@ -227,7 +223,7 @@ func compactWindowPct(compactWindow string, contextWindowSize int) int {
 func compactPctOverrideValue(compactPctOverride string) int {
 	pct, err := strconv.Atoi(compactPctOverride)
 	if err != nil || pct <= 0 || pct > 100 {
-		return 0
+		return 85
 	}
 	return pct
 }
