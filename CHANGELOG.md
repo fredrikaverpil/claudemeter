@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.23.1](https://github.com/fredrikaverpil/claudeline/compare/v0.23.0...v0.23.1) (2026-04-25)
+
+
+### Bug Fixes
+
+* **render:** respect Claude Code compaction settings ([#109](https://github.com/fredrikaverpil/claudeline/issues/109)) ([4a33e9c](https://github.com/fredrikaverpil/claudeline/commit/4a33e9c36f799914d19013b75f5882106a950c7f))
+
 ## [0.23.0](https://github.com/fredrikaverpil/claudeline/compare/v0.22.1...v0.23.0) (2026-04-15)
 
 
