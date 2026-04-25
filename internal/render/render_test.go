@@ -513,7 +513,7 @@ func TestContextColorFunc_custom_warnPct(t *testing.T) {
 	}
 }
 
-func TestCompactPct(t *testing.T) {
+func TestContextWarnPct(t *testing.T) {
 	t.Parallel()
 
 	tests := []struct {
@@ -526,38 +526,38 @@ func TestCompactPct(t *testing.T) {
 		{
 			name:              "default",
 			contextWindowSize: 1000000,
-			want:              85,
+			want:              80,
 		},
 		{
 			name:              "absolute compact window",
 			compactWindow:     "400000",
 			contextWindowSize: 1000000,
-			want:              34,
+			want:              32,
 		},
 		{
 			name:               "percentage override applies to absolute compact window",
 			compactWindow:      "400000",
 			contextWindowSize:  1000000,
 			compactPctOverride: "75",
-			want:               30,
+			want:               28,
 		},
 		{
 			name:               "percentage override applies to full window by default",
 			contextWindowSize:  1000000,
 			compactPctOverride: "75",
-			want:               75,
+			want:               70,
 		},
 		{
 			name:              "absolute compact window rounds",
 			compactWindow:     "333333",
 			contextWindowSize: 1000000,
-			want:              28,
+			want:              26,
 		},
 		{
 			name:              "absolute compact window clamps high",
 			compactWindow:     "2000000",
 			contextWindowSize: 1000000,
-			want:              85,
+			want:              80,
 		},
 		{
 			name:              "absolute compact window clamps low",
@@ -570,13 +570,13 @@ func TestCompactPct(t *testing.T) {
 			compactWindow:      "not-a-number",
 			contextWindowSize:  1000000,
 			compactPctOverride: "75",
-			want:               75,
+			want:               70,
 		},
 		{
 			name:               "missing context window size uses full window",
 			compactWindow:      "400000",
 			compactPctOverride: "75",
-			want:               75,
+			want:               70,
 		},
 	}
 
@@ -584,9 +584,9 @@ func TestCompactPct(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			got := compactPct(tt.compactWindow, tt.contextWindowSize, tt.compactPctOverride)
+			got := contextWarnPct(tt.compactWindow, tt.contextWindowSize, tt.compactPctOverride)
 			if got != tt.want {
-				t.Errorf("compactPct(%q, %d, %q) = %d, want %d",
+				t.Errorf("contextWarnPct(%q, %d, %q) = %d, want %d",
 					tt.compactWindow,
 					tt.contextWindowSize,
 					tt.compactPctOverride,

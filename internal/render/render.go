@@ -69,8 +69,7 @@ func Build(p Params) string {
 	if p.ContextUsedPct != nil {
 		contextPct = int(math.Round(*p.ContextUsedPct))
 	}
-	compactPct := compactPct(p.CompactWindow, p.ContextWindowSize, p.CompactPctOverride)
-	warnPct := compactPct - 5
+	warnPct := contextWarnPct(p.CompactWindow, p.ContextWindowSize, p.CompactPctOverride)
 	contextBar := Bar(contextPct, ContextColorFunc(warnPct))
 	if contextPct >= warnPct {
 		contextBar += " ⚠️"
@@ -196,10 +195,10 @@ func Build(p Params) string {
 	return Reset + strings.ReplaceAll(out, " ", "\u00A0")
 }
 
-func compactPct(compactWindow string, contextWindowSize int, compactPctOverride string) int {
+func contextWarnPct(compactWindow string, contextWindowSize int, compactPctOverride string) int {
 	pct := int(math.Round(
 		float64(compactWindowPct(compactWindow, contextWindowSize)) *
-			float64(compactPctOverrideValue(compactPctOverride)) / 100,
+			float64(warnPctOfCompactWindow(compactPctOverride)) / 100,
 	))
 	return max(1, pct)
 }
@@ -220,12 +219,12 @@ func compactWindowPct(compactWindow string, contextWindowSize int) int {
 	return pct
 }
 
-func compactPctOverrideValue(compactPctOverride string) int {
+func warnPctOfCompactWindow(compactPctOverride string) int {
 	pct, err := strconv.Atoi(compactPctOverride)
 	if err != nil || pct <= 0 || pct > 100 {
-		return 85
+		return 80
 	}
-	return pct
+	return max(1, pct-5)
 }
 
 // Bar renders a progress bar with ANSI colors.
