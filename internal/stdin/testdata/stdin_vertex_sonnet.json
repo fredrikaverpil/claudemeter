@@ -33,7 +33,6 @@
     "name": "default"
   },
   "session_id": "sanitized-session-id",
-  "session_name": "sanitized-session-name",
   "thinking": {
     "enabled": true
   },
