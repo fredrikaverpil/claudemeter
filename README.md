@@ -137,8 +137,11 @@ Key components:
   session limit
   [burns faster than normal](https://xcancel.com/trq212/status/2037254607001559305#m).
 - **Compaction warning:** A yellow `⚠️` appears on the context bar when usage is
-  within 5% of the auto-compaction threshold (85% by default, configurable via
-  `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE`).
+  within 5% of the auto-compaction threshold (85% by default). If Claude Code's
+  `CLAUDE_CODE_AUTO_COMPACT_WINDOW` is set, claudeline uses it as an absolute
+  token threshold relative to `context_window.context_window_size`. The legacy
+  `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE` percentage override is still supported as a
+  fallback.
 - **Extended context indicator:** A `🥵` appears on the context bar when
   `exceeds_200k_tokens` is true, signaling the session has entered extended
   context territory where model quality may degrade.

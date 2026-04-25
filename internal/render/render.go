@@ -36,6 +36,8 @@ type Params struct {
 	LoginType          string
 	Model              string
 	ContextUsedPct     *float64 // nil when unavailable
+	ContextWindowSize  int      // context_window.context_window_size from stdin
+	CompactWindow      string   // raw CLAUDE_CODE_AUTO_COMPACT_WINDOW value
 	CompactPctOverride string   // raw CLAUDE_AUTOCOMPACT_PCT_OVERRIDE value
 	Exceeds200kTokens  bool
 	Usage              *usage.Response
@@ -67,10 +69,7 @@ func Build(p Params) string {
 	if p.ContextUsedPct != nil {
 		contextPct = int(math.Round(*p.ContextUsedPct))
 	}
-	compactPct := 85
-	if v, err := strconv.Atoi(p.CompactPctOverride); err == nil && v > 0 && v <= 100 {
-		compactPct = v
-	}
+	compactPct := compactPct(p.CompactWindow, p.ContextWindowSize, p.CompactPctOverride)
 	warnPct := compactPct - 5
 	contextBar := Bar(contextPct, ContextColorFunc(warnPct))
 	if contextPct >= warnPct {
@@ -195,6 +194,42 @@ func Build(p Params) string {
 	// Leading reset clears stale ANSI state from previous renders.
 	// Non-breaking spaces prevent the terminal from collapsing whitespace.
 	return Reset + strings.ReplaceAll(out, " ", "\u00A0")
+}
+
+func compactPct(compactWindow string, contextWindowSize int, compactPctOverride string) int {
+	if pct := compactWindowPct(compactWindow, contextWindowSize); pct > 0 {
+		return pct
+	}
+
+	if pct := compactPctOverrideValue(compactPctOverride); pct > 0 {
+		return pct
+	}
+
+	return 85
+}
+
+func compactWindowPct(compactWindow string, contextWindowSize int) int {
+	windowTokens, err := strconv.Atoi(compactWindow)
+	if err != nil || windowTokens <= 0 || contextWindowSize <= 0 {
+		return 0
+	}
+
+	pct := int(math.Round(float64(windowTokens) / float64(contextWindowSize) * 100))
+	if pct < 1 {
+		return 1
+	}
+	if pct > 100 {
+		return 100
+	}
+	return pct
+}
+
+func compactPctOverrideValue(compactPctOverride string) int {
+	pct, err := strconv.Atoi(compactPctOverride)
+	if err != nil || pct <= 0 || pct > 100 {
+		return 0
+	}
+	return pct
 }
 
 // Bar renders a progress bar with ANSI colors.

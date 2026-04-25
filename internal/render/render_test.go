@@ -513,6 +513,91 @@ func TestContextColorFunc_custom_warnPct(t *testing.T) {
 	}
 }
 
+func TestCompactPct(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name               string
+		compactWindow      string
+		contextWindowSize  int
+		compactPctOverride string
+		want               int
+	}{
+		{
+			name:              "default",
+			contextWindowSize: 1000000,
+			want:              85,
+		},
+		{
+			name:              "absolute compact window",
+			compactWindow:     "400000",
+			contextWindowSize: 1000000,
+			want:              40,
+		},
+		{
+			name:               "absolute compact window takes precedence",
+			compactWindow:      "400000",
+			contextWindowSize:  1000000,
+			compactPctOverride: "75",
+			want:               40,
+		},
+		{
+			name:               "percentage override fallback",
+			contextWindowSize:  1000000,
+			compactPctOverride: "75",
+			want:               75,
+		},
+		{
+			name:              "absolute compact window rounds",
+			compactWindow:     "333333",
+			contextWindowSize: 1000000,
+			want:              33,
+		},
+		{
+			name:              "absolute compact window clamps high",
+			compactWindow:     "2000000",
+			contextWindowSize: 1000000,
+			want:              100,
+		},
+		{
+			name:              "absolute compact window clamps low",
+			compactWindow:     "1",
+			contextWindowSize: 1000000,
+			want:              1,
+		},
+		{
+			name:               "invalid absolute compact window uses fallback",
+			compactWindow:      "not-a-number",
+			contextWindowSize:  1000000,
+			compactPctOverride: "75",
+			want:               75,
+		},
+		{
+			name:               "missing context window size uses fallback",
+			compactWindow:      "400000",
+			compactPctOverride: "75",
+			want:               75,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			got := compactPct(tt.compactWindow, tt.contextWindowSize, tt.compactPctOverride)
+			if got != tt.want {
+				t.Errorf("compactPct(%q, %d, %q) = %d, want %d",
+					tt.compactWindow,
+					tt.contextWindowSize,
+					tt.compactPctOverride,
+					got,
+					tt.want,
+				)
+			}
+		})
+	}
+}
+
 func TestCost(t *testing.T) {
 	t.Parallel()
 
