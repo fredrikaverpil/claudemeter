@@ -136,9 +136,14 @@ Key components:
   peak hours (weekdays 13:00–19:00 UTC) for Pro and Max plans, when the 5-hour
   session limit
   [burns faster than normal](https://xcancel.com/trq212/status/2037254607001559305#m).
-- **Compaction warning:** A yellow `⚠️` appears on the context bar when usage is
-  within 5% of the auto-compaction threshold (85% by default, configurable via
-  `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE`).
+- **Compaction warning:** A yellow `⚠️` appears on the context bar when it
+  enters the red near-compaction zone (80% by default). Claude Code
+  auto-compacts later, at approximately 95% of its effective context capacity,
+  but claudeline warns earlier so you have time to react. If Claude Code's
+  `CLAUDE_CODE_AUTO_COMPACT_WINDOW` is set, claudeline applies its warning zones
+  relative to that effective capacity. If `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE` is
+  set, claudeline warns 5 percentage points before that configured percentage,
+  applied relative to the effective capacity.
 - **Extended context indicator:** A `🥵` appears on the context bar when
   `exceeds_200k_tokens` is true, signaling the session has entered extended
   context territory where model quality may degrade.

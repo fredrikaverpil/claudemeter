@@ -19,8 +19,9 @@ type Data struct {
 		DisplayName string `json:"display_name"`
 	} `json:"model"`
 	ContextWindow struct {
-		UsedPercentage *float64 `json:"used_percentage"`
-		CurrentUsage   *struct {
+		ContextWindowSize int      `json:"context_window_size"`
+		UsedPercentage    *float64 `json:"used_percentage"`
+		CurrentUsage      *struct {
 			CacheCreationInputTokens int `json:"cache_creation_input_tokens"`
 			CacheReadInputTokens     int `json:"cache_read_input_tokens"`
 		} `json:"current_usage"`

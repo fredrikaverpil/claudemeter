@@ -182,20 +182,22 @@ func TestParse(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name:  "valid with all fields",
-			input: `{"cwd":"/home/user","model":{"display_name":"Opus"},"context_window":{"used_percentage":42.5}}`,
+			name: "valid with all fields",
+			input: `{"cwd":"/home/user","model":{"display_name":"Opus"},` +
+				`"context_window":{"context_window_size":1000000,"used_percentage":42.5}}`,
 			want: Data{
 				Cwd: "/home/user",
 				Model: struct {
 					DisplayName string `json:"display_name"`
 				}{DisplayName: "Opus"},
 				ContextWindow: struct {
-					UsedPercentage *float64 `json:"used_percentage"`
-					CurrentUsage   *struct {
+					ContextWindowSize int      `json:"context_window_size"`
+					UsedPercentage    *float64 `json:"used_percentage"`
+					CurrentUsage      *struct {
 						CacheCreationInputTokens int `json:"cache_creation_input_tokens"`
 						CacheReadInputTokens     int `json:"cache_read_input_tokens"`
 					} `json:"current_usage"`
-				}{UsedPercentage: &pct},
+				}{ContextWindowSize: 1000000, UsedPercentage: &pct},
 			},
 		},
 		{
@@ -260,8 +262,9 @@ func TestParse(t *testing.T) {
 					DisplayName string `json:"display_name"`
 				}{DisplayName: "Opus"},
 				ContextWindow: struct {
-					UsedPercentage *float64 `json:"used_percentage"`
-					CurrentUsage   *struct {
+					ContextWindowSize int      `json:"context_window_size"`
+					UsedPercentage    *float64 `json:"used_percentage"`
+					CurrentUsage      *struct {
 						CacheCreationInputTokens int `json:"cache_creation_input_tokens"`
 						CacheReadInputTokens     int `json:"cache_read_input_tokens"`
 					} `json:"current_usage"`
@@ -328,6 +331,13 @@ func TestParse(t *testing.T) {
 			}
 			if got.Model.DisplayName != tt.want.Model.DisplayName {
 				t.Errorf("Model.DisplayName = %q, want %q", got.Model.DisplayName, tt.want.Model.DisplayName)
+			}
+			if got.ContextWindow.ContextWindowSize != tt.want.ContextWindow.ContextWindowSize {
+				t.Errorf(
+					"ContextWindowSize = %d, want %d",
+					got.ContextWindow.ContextWindowSize,
+					tt.want.ContextWindow.ContextWindowSize,
+				)
 			}
 			if tt.want.ContextWindow.UsedPercentage == nil {
 				if got.ContextWindow.UsedPercentage != nil {

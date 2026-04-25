@@ -151,6 +151,8 @@ func run(cfg config) error {
 		LoginType:          loginType,
 		Model:              data.Model.DisplayName,
 		ContextUsedPct:     data.ContextWindow.UsedPercentage,
+		ContextWindowSize:  data.ContextWindow.ContextWindowSize,
+		CompactWindow:      os.Getenv("CLAUDE_CODE_AUTO_COMPACT_WINDOW"),
 		CompactPctOverride: os.Getenv("CLAUDE_AUTOCOMPACT_PCT_OVERRIDE"),
 		Exceeds200kTokens:  data.Exceeds200kTokens,
 		CacheMiss:          cacheMiss,
