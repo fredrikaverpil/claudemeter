@@ -157,7 +157,7 @@ var Capture = &pk.Task{
 			return fmt.Errorf("parse stdin JSON: %w", err)
 		}
 
-		// Determine the name prefix: provider (if detected) or plan.
+		// Determine the name prefix: provider (if detected) or subscription plan.
 		var namePrefix string
 		if provider := detectProvider(); provider != "" {
 			namePrefix = provider
@@ -166,7 +166,7 @@ var Capture = &pk.Task{
 			if err != nil {
 				// No OAuth credentials found — likely API key usage without the
 				// env var set in this shell. Fall back to "api" as the prefix.
-				run.Printf(ctx, "warning: resolve plan: %v — assuming API key usage\n", err)
+				run.Printf(ctx, "warning: could not resolve subscription plan: %v — assuming API/provider usage\n", err)
 				namePrefix = "api"
 			} else {
 				namePrefix = plan
@@ -221,8 +221,8 @@ var Capture = &pk.Task{
 				return fmt.Errorf("write credentials testdata: %w", err)
 			}
 			run.Printf(ctx, "saved %s\n", credsPath)
-		case namePrefix == "api":
-			// API key users have no OAuth credentials — expected, nothing to capture.
+		case detectProvider() != "":
+			// Provider users (API key, Bedrock, Vertex, Foundry) have no OAuth credentials — expected, nothing to capture.
 		default:
 			run.Printf(ctx, "skipping credentials capture: %v\n", credsErr)
 		}

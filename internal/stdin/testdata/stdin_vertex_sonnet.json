@@ -1,16 +1,16 @@
 {
   "context_window": {
-    "context_window_size": 1000000,
+    "context_window_size": 200000,
     "current_usage": {
-      "cache_creation_input_tokens": 34572,
-      "cache_read_input_tokens": 0,
-      "input_tokens": 6,
-      "output_tokens": 15
+      "cache_creation_input_tokens": 386,
+      "cache_read_input_tokens": 58520,
+      "input_tokens": 1,
+      "output_tokens": 71
     },
-    "remaining_percentage": 97,
-    "total_input_tokens": 6,
-    "total_output_tokens": 15,
-    "used_percentage": 3
+    "remaining_percentage": 71,
+    "total_input_tokens": 70283,
+    "total_output_tokens": 55110,
+    "used_percentage": 29
   },
   "cost": {
     "total_api_duration_ms": 0,
@@ -21,13 +21,13 @@
   },
   "cwd": "/sanitized/project",
   "effort": {
-    "level": "xhigh"
+    "level": "high"
   },
   "exceeds_200k_tokens": false,
   "fast_mode": false,
   "model": {
-    "display_name": "Opus 4.7 (1M context)",
-    "id": "claude-opus-4-7[1m]"
+    "display_name": "Sonnet 4.6",
+    "id": "claude-sonnet-4-6"
   },
   "output_style": {
     "name": "default"

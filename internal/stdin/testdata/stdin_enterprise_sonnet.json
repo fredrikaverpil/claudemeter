@@ -1,16 +1,11 @@
 {
   "context_window": {
-    "context_window_size": 1000000,
-    "current_usage": {
-      "cache_creation_input_tokens": 123,
-      "cache_read_input_tokens": 68558,
-      "input_tokens": 1,
-      "output_tokens": 48
-    },
-    "remaining_percentage": 93,
-    "total_input_tokens": 30,
-    "total_output_tokens": 9240,
-    "used_percentage": 7
+    "context_window_size": 200000,
+    "current_usage": null,
+    "remaining_percentage": null,
+    "total_input_tokens": 0,
+    "total_output_tokens": 0,
+    "used_percentage": null
   },
   "cost": {
     "total_api_duration_ms": 0,
@@ -20,17 +15,24 @@
     "total_lines_removed": 0
   },
   "cwd": "/sanitized/project",
+  "effort": {
+    "level": "high"
+  },
   "exceeds_200k_tokens": false,
+  "fast_mode": false,
   "model": {
-    "display_name": "Opus 4.6 (1M context)",
-    "id": "claude-opus-4-6[1m]"
+    "display_name": "Sonnet 4.6",
+    "id": "claude-sonnet-4-6"
   },
   "output_style": {
     "name": "default"
   },
   "session_id": "sanitized-session-id",
+  "thinking": {
+    "enabled": true
+  },
   "transcript_path": "/sanitized/transcript.jsonl",
-  "version": "2.1.87",
+  "version": "2.1.119",
   "workspace": {
     "added_dirs": [],
     "current_dir": "/sanitized/project",
