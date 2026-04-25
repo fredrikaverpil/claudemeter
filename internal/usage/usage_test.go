@@ -21,14 +21,16 @@ import (
 // DisallowUnknownFields to detect when the API adds new fields.
 // Update this struct and testdata/usage_*.json when the schema changes.
 type usageResponse struct {
-	FiveHour         *quotaLimit `json:"five_hour"`
-	SevenDay         *quotaLimit `json:"seven_day"`
-	SevenDaySonnet   *quotaLimit `json:"seven_day_sonnet"`
-	SevenDayOpus     *quotaLimit `json:"seven_day_opus"`
-	SevenDayOAuthApp *quotaLimit `json:"seven_day_oauth_apps"`
-	SevenDayCowork   *quotaLimit `json:"seven_day_cowork"`
-	IguanaNecktie    *quotaLimit `json:"iguana_necktie"`
-	ExtraUsage       *extraUsage `json:"extra_usage"`
+	FiveHour            *quotaLimit `json:"five_hour"`
+	SevenDay            *quotaLimit `json:"seven_day"`
+	SevenDaySonnet      *quotaLimit `json:"seven_day_sonnet"`
+	SevenDayOpus        *quotaLimit `json:"seven_day_opus"`
+	SevenDayOAuthApp    *quotaLimit `json:"seven_day_oauth_apps"`
+	SevenDayCowork      *quotaLimit `json:"seven_day_cowork"`
+	SevenDayOmelette    *quotaLimit `json:"seven_day_omelette"`
+	IguanaNecktie       *quotaLimit `json:"iguana_necktie"`
+	OmelettePromotional *quotaLimit `json:"omelette_promotional"`
+	ExtraUsage          *extraUsage `json:"extra_usage"`
 }
 
 type quotaLimit struct {
@@ -38,6 +40,7 @@ type quotaLimit struct {
 
 type extraUsage struct {
 	IsEnabled    bool     `json:"is_enabled"`
+	Currency     *string  `json:"currency"`
 	MonthlyLimit *float64 `json:"monthly_limit"`
 	UsedCredits  *float64 `json:"used_credits"`
 	Utilization  *float64 `json:"utilization"`

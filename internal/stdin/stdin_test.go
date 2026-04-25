@@ -58,7 +58,15 @@ type payload struct {
 		RemainingPercentage *float64 `json:"remaining_percentage"`
 	} `json:"context_window"`
 	Exceeds200kTokens bool `json:"exceeds_200k_tokens"`
-	RateLimits        *struct {
+	FastMode          bool `json:"fast_mode"`
+	Effort            *struct {
+		Level string `json:"level"`
+	} `json:"effort"`
+	Thinking *struct {
+		Enabled bool `json:"enabled"`
+	} `json:"thinking"`
+	SessionName string `json:"session_name"`
+	RateLimits  *struct {
 		FiveHour *rateLimit `json:"five_hour"`
 		SevenDay *rateLimit `json:"seven_day"`
 	} `json:"rate_limits"`

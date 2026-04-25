@@ -324,6 +324,7 @@ func mustUserHomeDir() string {
 func sanitizePayload(m map[string]any) {
 	// Identity.
 	setNestedString(m, "sanitized-session-id", "session_id")
+	setNestedString(m, "sanitized-session-name", "session_name")
 
 	// Paths.
 	setNestedString(m, "/sanitized/transcript.jsonl", "transcript_path")

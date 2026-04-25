@@ -1,15 +1,21 @@
 {
   "extra_usage": {
+    "currency": "USD",
     "is_enabled": true,
-    "monthly_limit": 50000,
-    "used_credits": 12992,
-    "utilization": 25.984
+    "monthly_limit": 100000,
+    "used_credits": 68055,
+    "utilization": 68.05499999999999
   },
   "five_hour": null,
   "iguana_necktie": null,
+  "omelette_promotional": {
+    "resets_at": null,
+    "utilization": 0
+  },
   "seven_day": null,
   "seven_day_cowork": null,
   "seven_day_oauth_apps": null,
+  "seven_day_omelette": null,
   "seven_day_opus": null,
   "seven_day_sonnet": null
 }
