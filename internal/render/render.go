@@ -34,6 +34,7 @@ const barWidth = 5
 // Params holds all data needed to build the statusline.
 type Params struct {
 	LoginType          string
+	ShowIdentity       bool
 	Model              string
 	ContextUsedPct     *float64 // nil when unavailable
 	ContextWindowSize  int      // context_window.context_window_size from stdin
@@ -62,7 +63,11 @@ type Params struct {
 // Build assembles the complete statusline string from all collected data.
 func Build(p Params) string {
 	// Identity.
-	identity := Identity(p.LoginType, p.Model)
+	loginType := p.LoginType
+	if !p.ShowIdentity {
+		loginType = ""
+	}
+	identity := Identity(loginType, p.Model)
 
 	// Context bar.
 	contextPct := 0

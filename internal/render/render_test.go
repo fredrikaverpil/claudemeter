@@ -728,6 +728,60 @@ func TestCompactName(t *testing.T) {
 	}
 }
 
+func TestBuild_HideIdentity(t *testing.T) {
+	t.Parallel()
+
+	pct := 25.0
+
+	t.Run("hide subscription plan", func(t *testing.T) {
+		t.Parallel()
+		got := Build(Params{
+			LoginType:      "Pro",
+			Model:          "Opus",
+			ContextUsedPct: &pct,
+			ShowIdentity:   false,
+		})
+		if !strings.Contains(got, "Opus") {
+			t.Errorf("Build() with ShowIdentity=false should contain model %q, got %q", "Opus", got)
+		}
+		if strings.Contains(got, "Pro") {
+			t.Errorf("Build() with ShowIdentity=false should not contain plan %q, got %q", "Pro", got)
+		}
+	})
+
+	t.Run("hide provider label", func(t *testing.T) {
+		t.Parallel()
+		got := Build(Params{
+			LoginType:      "API",
+			Model:          "Sonnet",
+			ContextUsedPct: &pct,
+			ShowIdentity:   false,
+		})
+		if !strings.Contains(got, "Sonnet") {
+			t.Errorf("Build() with ShowIdentity=false should contain model %q, got %q", "Sonnet", got)
+		}
+		if strings.Contains(got, "API") {
+			t.Errorf("Build() with ShowIdentity=false should not contain provider %q, got %q", "API", got)
+		}
+	})
+
+	t.Run("show preserves both segments", func(t *testing.T) {
+		t.Parallel()
+		got := Build(Params{
+			LoginType:      "Pro",
+			Model:          "Opus",
+			ContextUsedPct: &pct,
+			ShowIdentity:   true,
+		})
+		if !strings.Contains(got, "Pro") {
+			t.Errorf("Build() with ShowIdentity=true should contain plan %q, got %q", "Pro", got)
+		}
+		if !strings.Contains(got, "Opus") {
+			t.Errorf("Build() with ShowIdentity=true should contain model %q, got %q", "Opus", got)
+		}
+	})
+}
+
 func TestBuild_CacheMiss(t *testing.T) {
 	t.Parallel()
 

@@ -62,6 +62,7 @@ func currentVersion() string {
 
 // config holds CLI configuration.
 type config struct {
+	showIdentity    bool
 	showGitBranch   bool
 	gitBranchMaxLen int
 	showCwd         bool
@@ -84,6 +85,7 @@ func runMain() int {
 	showCwd := flag.Bool("cwd", false, "show working directory name in the status line")
 	cwdMaxLen := flag.Int("cwd-max-len", 30, "max display length for working directory name")
 	showCost := flag.Bool("cost", false, "show estimated session cost in the status line (always on for API key users)")
+	showIdentity := flag.Bool("identity", true, "show subscription plan / provider in the status line")
 	usageFile := flag.String("usage-file", "", "read usage data from file instead of API")
 	statusFile := flag.String("status-file", "", "read status data from file instead of API")
 	updateFile := flag.String("update-file", "", "read update data from file instead of API")
@@ -115,6 +117,7 @@ func runMain() int {
 
 	cfg := config{
 		debug:           *debug,
+		showIdentity:    *showIdentity,
 		showGitBranch:   *showGitBranch,
 		gitBranchMaxLen: *gitBranchMaxLen,
 		showCwd:         *showCwd,
@@ -149,6 +152,7 @@ func run(cfg config) error {
 
 	output := render.Build(render.Params{
 		LoginType:          loginType,
+		ShowIdentity:       cfg.showIdentity,
 		Model:              data.Model.DisplayName,
 		ContextUsedPct:     data.ContextWindow.UsedPercentage,
 		ContextWindowSize:  data.ContextWindow.ContextWindowSize,
