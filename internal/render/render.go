@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -36,6 +37,7 @@ type Params struct {
 	LoginType          string
 	ShowIdentity       bool
 	Model              string
+	ModelMode          string
 	ContextUsedPct     *float64 // nil when unavailable
 	ContextWindowSize  int      // context_window.context_window_size from stdin
 	CompactWindow      string   // raw CLAUDE_CODE_AUTO_COMPACT_WINDOW value
@@ -67,7 +69,7 @@ func Build(p Params) string {
 	if !p.ShowIdentity {
 		loginType = ""
 	}
-	identity := Identity(loginType, p.Model)
+	identity := Identity(loginType, FormatModel(p.Model, p.ModelMode))
 
 	// Context bar.
 	contextPct := 0
@@ -286,8 +288,53 @@ func Identity(loginType, model string) string {
 		return Cyan + loginType + Reset + Dim + " │ " + Reset + Cyan + model + Reset
 	case model != "":
 		return Cyan + model + Reset
+	case loginType != "":
+		return Cyan + loginType + Reset
 	default:
 		return ""
+	}
+}
+
+// minimalPatterns abbreviates known model display names. The first match
+// wins; unmatched names are returned unchanged. Adding a new family or
+// context-size shape is a one-line append.
+var minimalPatterns = []struct {
+	re      *regexp.Regexp
+	replace func(m []string) string
+}{
+	// "Opus 4.7 (1M context)" → "O4.7(1M)"
+	{
+		regexp.MustCompile(`^(Opus|Sonnet|Haiku) (\d+(?:\.\d+)?) \((\d+[KMkm])\s+context\)$`),
+		func(m []string) string {
+			return string(m[1][0]) + m[2] + "(" + strings.ToUpper(m[3]) + ")"
+		},
+	},
+	// "Opus 4.7" → "O4.7"
+	{
+		regexp.MustCompile(`^(Opus|Sonnet|Haiku) (\d+(?:\.\d+)?)$`),
+		func(m []string) string {
+			return string(m[1][0]) + m[2]
+		},
+	},
+}
+
+// FormatModel returns the model string for display.
+// mode "false" hides the model, "minimal" abbreviates known families
+// (e.g. "Opus 4.7 (1M context)" → "O4.7(1M)"), and anything else (including
+// "full" and the empty string) returns displayName unchanged.
+func FormatModel(displayName, mode string) string {
+	switch mode {
+	case "false":
+		return ""
+	case "minimal":
+		for _, p := range minimalPatterns {
+			if m := p.re.FindStringSubmatch(displayName); m != nil {
+				return p.replace(m)
+			}
+		}
+		return displayName
+	default:
+		return displayName
 	}
 }
 
@@ -295,7 +342,10 @@ func Identity(loginType, model string) string {
 func Output(identity, contextBar, usage5h, usage7d, cost, usageExtra, statusIndicator, updateIndicator string) string {
 	sep := Dim + " │ " + Reset
 
-	out := identity + sep + contextBar
+	out := contextBar
+	if identity != "" {
+		out = identity + sep + contextBar
+	}
 	if usage5h != "" {
 		out += sep + usage5h
 	}

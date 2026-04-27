@@ -70,6 +70,13 @@ func TestRenderOutput(t *testing.T) {
 			contextBar: "█░░░░ 23%",
 			want:       ident + sep + "█░░░░ 23%",
 		},
+		// Empty identity: leading separator is suppressed.
+		{
+			name:       "empty identity drops leading separator",
+			identity:   "",
+			contextBar: "█░░░░ 23%",
+			want:       "█░░░░ 23%",
+		},
 		// Identity variants with cwd/branch.
 		{
 			name:       "with cwd",
@@ -472,7 +479,7 @@ func TestIdentity(t *testing.T) {
 		},
 		{name: "model only", model: "Sonnet", loginType: "", want: Cyan + "Sonnet" + Reset},
 		{name: "both empty", model: "", loginType: "", want: ""},
-		{name: "plan only returns empty", model: "", loginType: "Pro", want: ""},
+		{name: "plan only renders plan", model: "", loginType: "Pro", want: Cyan + "Pro" + Reset},
 	}
 
 	for _, tt := range tests {
@@ -482,6 +489,84 @@ func TestIdentity(t *testing.T) {
 			got := Identity(tt.loginType, tt.model)
 			if got != tt.want {
 				t.Errorf("Identity(%q, %q) = %q, want %q", tt.loginType, tt.model, got, tt.want)
+			}
+		})
+	}
+}
+
+func TestFormatModel(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name        string
+		displayName string
+		mode        string
+		want        string
+	}{
+		// false mode hides the model.
+		{name: "false mode hides", displayName: "Opus 4.7", mode: "false", want: ""},
+		{name: "false mode hides empty", displayName: "", mode: "false", want: ""},
+
+		// full mode is unchanged.
+		{name: "full mode unchanged", displayName: "Opus 4.7", mode: "full", want: "Opus 4.7"},
+		{
+			name:        "full mode preserves context suffix",
+			displayName: "Opus 4.7 (1M context)",
+			mode:        "full",
+			want:        "Opus 4.7 (1M context)",
+		},
+
+		// Defensive default: empty / unrecognized mode acts like full.
+		{name: "empty mode defaults to full", displayName: "Opus 4.7", mode: "", want: "Opus 4.7"},
+		{name: "unknown mode defaults to full", displayName: "Opus 4.7", mode: "garbage", want: "Opus 4.7"},
+
+		// Minimal mode: matched cases.
+		{name: "minimal sonnet", displayName: "Sonnet 4.6", mode: "minimal", want: "S4.6"},
+		{name: "minimal opus", displayName: "Opus 4.7", mode: "minimal", want: "O4.7"},
+		{name: "minimal haiku", displayName: "Haiku 4.5", mode: "minimal", want: "H4.5"},
+		{
+			name:        "minimal opus with 1M context",
+			displayName: "Opus 4.7 (1M context)",
+			mode:        "minimal",
+			want:        "O4.7(1M)",
+		},
+		{
+			name:        "minimal opus with 200k context uppercased",
+			displayName: "Opus 4.7 (200k context)",
+			mode:        "minimal",
+			want:        "O4.7(200K)",
+		},
+		{
+			name:        "minimal opus with 200K context",
+			displayName: "Opus 4.7 (200K context)",
+			mode:        "minimal",
+			want:        "O4.7(200K)",
+		},
+
+		// Minimal mode: unchanged-fallback cases.
+		{
+			name:        "minimal unknown variant unchanged",
+			displayName: "Mithril 9.99 Ætheric",
+			mode:        "minimal",
+			want:        "Mithril 9.99 Ætheric",
+		},
+		{name: "minimal family alone unchanged", displayName: "Sonnet", mode: "minimal", want: "Sonnet"},
+		{name: "minimal empty unchanged", displayName: "", mode: "minimal", want: ""},
+		{
+			name:        "minimal lowercase family unchanged",
+			displayName: "sonnet 4.6",
+			mode:        "minimal",
+			want:        "sonnet 4.6",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			got := FormatModel(tt.displayName, tt.mode)
+			if got != tt.want {
+				t.Errorf("FormatModel(%q, %q) = %q, want %q", tt.displayName, tt.mode, got, tt.want)
 			}
 		})
 	}
@@ -778,6 +863,57 @@ func TestBuild_HideIdentity(t *testing.T) {
 		}
 		if !strings.Contains(got, "Opus") {
 			t.Errorf("Build() with ShowIdentity=true should contain model %q, got %q", "Opus", got)
+		}
+	})
+
+	t.Run("hide model only", func(t *testing.T) {
+		t.Parallel()
+		got := Build(Params{
+			LoginType:      "Pro",
+			Model:          "Opus",
+			ContextUsedPct: &pct,
+			ShowIdentity:   true,
+			ModelMode:      "false",
+		})
+		if !strings.Contains(got, "Pro") {
+			t.Errorf("Build() with ModelMode=false should contain plan %q, got %q", "Pro", got)
+		}
+		if strings.Contains(got, "Opus") {
+			t.Errorf("Build() with ModelMode=false should not contain model %q, got %q", "Opus", got)
+		}
+	})
+
+	t.Run("hide both identity and model", func(t *testing.T) {
+		t.Parallel()
+		got := Build(Params{
+			LoginType:      "Pro",
+			Model:          "Opus",
+			ContextUsedPct: &pct,
+			ShowIdentity:   false,
+			ModelMode:      "false",
+		})
+		if strings.Contains(got, "Pro") {
+			t.Errorf("Build() with both hidden should not contain plan %q, got %q", "Pro", got)
+		}
+		if strings.Contains(got, "Opus") {
+			t.Errorf("Build() with both hidden should not contain model %q, got %q", "Opus", got)
+		}
+	})
+
+	t.Run("minimal model abbreviation", func(t *testing.T) {
+		t.Parallel()
+		got := Build(Params{
+			LoginType:      "Pro",
+			Model:          "Sonnet 4.6",
+			ContextUsedPct: &pct,
+			ShowIdentity:   true,
+			ModelMode:      "minimal",
+		})
+		if !strings.Contains(got, "S4.6") {
+			t.Errorf("Build() with ModelMode=minimal should contain abbreviated %q, got %q", "S4.6", got)
+		}
+		if strings.Contains(got, "Sonnet 4.6") {
+			t.Errorf("Build() with ModelMode=minimal should not contain full %q, got %q", "Sonnet 4.6", got)
 		}
 	})
 }
