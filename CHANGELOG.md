@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.24.0](https://github.com/fredrikaverpil/claudeline/compare/v0.23.1...v0.24.0) (2026-05-07)
+
+
+### Features
+
+* **policy:** disable peak-hours indicator ([#114](https://github.com/fredrikaverpil/claudeline/issues/114)) ([4030688](https://github.com/fredrikaverpil/claudeline/commit/403068804d4a7a8730c9e457e4a03be28459477c))
+
 ## [0.23.1](https://github.com/fredrikaverpil/claudeline/compare/v0.23.0...v0.23.1) (2026-04-25)
 
 
