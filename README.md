@@ -70,18 +70,20 @@ bars. Written in Go with no external dependencies (stdlib only).
 
 ## Flags
 
-| Flag                  | Default | Description                                          |
-| --------------------- | ------- | ---------------------------------------------------- |
-| `-debug`              | `false` | Write warnings/errors to `/tmp/claudeline/debug.log` |
-| `-cwd`                | `false` | Show working directory name in the status line       |
-| `-cwd-max-len`        | `30`    | Max display length for working directory name        |
-| `-git-branch`         | `false` | Show git branch in the status line                   |
-| `-git-branch-max-len` | `30`    | Max display length for git branch                    |
-| `-cost`               | `false` | Show estimated session cost in the status line       |
-| `-usage-file`         |         | Read usage data from file instead of API             |
-| `-status-file`        |         | Read status data from file instead of API            |
-| `-update-file`        |         | Read update data from file instead of API            |
-| `-version`            | `false` | Print version and exit                               |
+| Flag                  | Default | Description                                                       |
+| --------------------- | ------- | ----------------------------------------------------------------- |
+| `-debug`              | `false` | Write warnings/errors to `/tmp/claudeline/debug.log`              |
+| `-identity`           | `true`  | Show subscription plan / provider label in the status line        |
+| `-model`              | `full`  | Model display mode: `false` hide, `minimal` (e.g. `O4.7(1M)`), `full` |
+| `-cwd`                | `false` | Show working directory name in the status line                    |
+| `-cwd-max-len`        | `30`    | Max display length for working directory name                     |
+| `-git-branch`         | `false` | Show git branch in the status line                                |
+| `-git-branch-max-len` | `30`    | Max display length for git branch                                 |
+| `-cost`               | `false` | Show estimated session cost in the status line                    |
+| `-usage-file`         |         | Read usage data from file instead of API                          |
+| `-status-file`        |         | Read status data from file instead of API                         |
+| `-update-file`        |         | Read update data from file instead of API                         |
+| `-version`            | `false` | Print version and exit                                            |
 
 Example with working directory and git branch enabled:
 
