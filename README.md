@@ -24,7 +24,7 @@ bars. Written in Go with no external dependencies (stdlib only).
 
 | Indicator            | Meaning                                                                                                                                                               |
 | -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `⚡️`                 | Peak hours: 5-hour limit burns [faster than normal](https://xcancel.com/trq212/status/2037254607001559305#m)                                                          |
+| `⚡️`                 | Peak hours: 5-hour limit burns faster than normal. Disabled [since SpaceX deal](https://www.anthropic.com/news/higher-limits-spacex).                                 |
 | `⚠️`                 | Approaching auto-compaction threshold                                                                                                                                 |
 | `🥵`                 | Extended context (>200k tokens) — model quality may degrade                                                                                                           |
 | `🔥▂` `🔥▄▂` `🔥▆▄▂` | Anthropic service disruption (minor / major / critical)                                                                                                               |
