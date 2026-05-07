@@ -16,23 +16,24 @@ func TestIsPeakHours(t *testing.T) {
 		want    bool
 	}{
 		// Time-based tests (affected sub type).
+		// Peak hours are currently disabled, so all cases return false.
 		{
 			name:    "weekday at window start",
 			t:       time.Date(2025, 1, 1, 13, 0, 0, 0, time.UTC), // Wednesday
 			subType: "pro",
-			want:    true,
+			want:    false,
 		},
 		{
 			name:    "weekday inside window",
 			t:       time.Date(2025, 1, 1, 16, 30, 0, 0, time.UTC), // Wednesday
 			subType: "pro",
-			want:    true,
+			want:    false,
 		},
 		{
 			name:    "weekday at last hour of window",
 			t:       time.Date(2025, 1, 1, 18, 59, 59, 0, time.UTC), // Wednesday
 			subType: "pro",
-			want:    true,
+			want:    false,
 		},
 		{
 			name:    "weekday one minute before window",
@@ -62,13 +63,13 @@ func TestIsPeakHours(t *testing.T) {
 			name:    "monday in window",
 			t:       time.Date(2025, 1, 6, 14, 0, 0, 0, time.UTC), // Monday
 			subType: "pro",
-			want:    true,
+			want:    false,
 		},
 		{
 			name:    "friday in window",
 			t:       time.Date(2025, 1, 3, 18, 0, 0, 0, time.UTC), // Friday
 			subType: "pro",
-			want:    true,
+			want:    false,
 		},
 		{
 			name:    "saturday in window hours",
@@ -84,11 +85,11 @@ func TestIsPeakHours(t *testing.T) {
 		},
 
 		// Subscription type tests (peak window time).
-		{name: "pro lowercase", t: time.Date(2025, 1, 1, 14, 0, 0, 0, time.UTC), subType: "pro", want: true},
-		{name: "Pro mixed case", t: time.Date(2025, 1, 1, 14, 0, 0, 0, time.UTC), subType: "Pro", want: true},
-		{name: "max", t: time.Date(2025, 1, 1, 14, 0, 0, 0, time.UTC), subType: "max", want: true},
-		{name: "max_5x variant", t: time.Date(2025, 1, 1, 14, 0, 0, 0, time.UTC), subType: "max_5x", want: true},
-		{name: "Max mixed case", t: time.Date(2025, 1, 1, 14, 0, 0, 0, time.UTC), subType: "Max", want: true},
+		{name: "pro lowercase", t: time.Date(2025, 1, 1, 14, 0, 0, 0, time.UTC), subType: "pro", want: false},
+		{name: "Pro mixed case", t: time.Date(2025, 1, 1, 14, 0, 0, 0, time.UTC), subType: "Pro", want: false},
+		{name: "max", t: time.Date(2025, 1, 1, 14, 0, 0, 0, time.UTC), subType: "max", want: false},
+		{name: "max_5x variant", t: time.Date(2025, 1, 1, 14, 0, 0, 0, time.UTC), subType: "max_5x", want: false},
+		{name: "Max mixed case", t: time.Date(2025, 1, 1, 14, 0, 0, 0, time.UTC), subType: "Max", want: false},
 		{name: "team", t: time.Date(2025, 1, 1, 14, 0, 0, 0, time.UTC), subType: "team", want: false},
 		{name: "enterprise", t: time.Date(2025, 1, 1, 14, 0, 0, 0, time.UTC), subType: "enterprise", want: false},
 		{name: "empty string", t: time.Date(2025, 1, 1, 14, 0, 0, 0, time.UTC), subType: "", want: false},
